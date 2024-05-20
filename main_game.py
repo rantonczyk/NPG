@@ -4,7 +4,7 @@ pygame.font.init()
 
 # czcionka i prowizoryczna lista wyrazów
 font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
-words = ["a", "abc", "trzy", "radek"]
+words = ["a", "abc", "trzy", "radek","michal","dwósłowne chasło","konstantynopol"]
 
 # główne parametry ekranu
 size = width, height = 1200, 800
@@ -16,8 +16,8 @@ clock = pygame.time.Clock()
 class Falling_object:
     # konstruktor
     def __init__(self):
-        self.image = pygame.image.load("graphics/dymek.png")
-        self.pos = self.image.get_rect().move(random.randrange(width - 150), 0)
+        self.image = pygame.image.load("graphics/dymek_learning.png")
+        self.pos = self.image.get_rect().move(random.randrange(width - 250), 0)
         self.text = words[random.randrange(len(words))]
         self.text_surface = font.render(self.text, False, (0, 0, 0))
         self.text_pos = self.text_surface.get_rect()
