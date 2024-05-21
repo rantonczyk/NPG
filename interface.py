@@ -55,16 +55,16 @@ class Interface():
             but_quit.draw_button()
         elif self.game_state == Current_pos.EASY:
             screen.blit(background_easy, (0, 0))
-            but_quit.draw_button()
+            but_back.draw_button()
         elif self.game_state == Current_pos.MEDIUM:
-                screen.blit(background_medium, (0, 0))
-                but_quit.draw_button()
+            screen.blit(background_medium, (0, 0))
+            but_back.draw_button()
         elif self.game_state == Current_pos.HARD:
-                screen.blit(background_hard, (0, 0))
-                but_quit.draw_button()
+            screen.blit(background_hard, (0, 0))
+            but_back.draw_button()
         elif self.game_state == Current_pos.LEARNING:
-                screen.blit(background_learning, (0, 0))
-                but_quit.draw_button()
+            screen.blit(background_learning, (0, 0))
+            but_back.draw_button()
 
 interface = Interface()
      
@@ -100,7 +100,8 @@ but_easy = Button("Łatwy", (600, 240), 'graphics/dymek_easy.png', Current_pos.E
 but_medium = Button("Średni", (600,370), 'graphics/dymek_easy.png',Current_pos.MEDIUM, "Black")
 but_hard = Button("Trudny", (600, 500), 'graphics/dymek_easy.png', Current_pos.HARD, "Black")
 but_learning = Button("Nauka", (600, 110), 'graphics/dymek_easy.png', Current_pos.LEARNING, "Black")
-buttons = [but_play, but_hall, but_about_us, but_quit, but_easy, but_medium, but_hard, but_learning]
+but_back = Button("Powrót", (150, 700), 'graphics/dymek_hard.png', Current_pos.MODE_CHOICE, "Black")
+buttons = [but_play, but_hall, but_about_us, but_quit, but_easy, but_medium, but_hard, but_learning, but_back]
 
 while True:
     for event in pygame.event.get():
