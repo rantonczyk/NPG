@@ -4,7 +4,13 @@ pygame.font.init()
 
 # czcionka i prowizoryczna lista wyrazów
 font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
-words = ["a", "abc", "trzy", "radek","michal","dwósłowne chasło","konstantynopol"]
+
+# words = ["a", "abc", "trzy", "radek","michal","dwósłowne chasło","konstantynopol"]
+
+# wybieranie słów z bazy
+mode = "hard"
+with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
+    words = file.read().split("\n")
 
 # główne parametry ekranu
 size = width, height = 1200, 800
