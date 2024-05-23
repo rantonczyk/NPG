@@ -1,21 +1,22 @@
 import pygame
 from sys import exit
 from enum import Enum
+import main_game as main
 
 pygame.init()
 clock = pygame.time.Clock()
-screen = pygame.display.set_mode((1200,800))
+screen = pygame.display.set_mode((1200, 800))
 pygame.display.set_caption('Keyboard Master')
 background_menu = pygame.image.load('graphics/background_menu.png').convert()
-background_easy = pygame.image.load('graphics/background_easy.png').convert()
-background_medium = pygame.image.load('graphics/background_medium.png').convert()
-background_hard = pygame.image.load('graphics/background_hard.png').convert()
-background_learning = pygame.image.load('graphics/background_learning.png').convert()
+# background_easy = pygame.image.load('graphics/background_easy.png').convert()
+# background_medium = pygame.image.load('graphics/background_medium.png').convert()
+# background_hard = pygame.image.load('graphics/background_hard.png').convert()
+# background_learning = pygame.image.load('graphics/background_learning.png').convert()
 background_hall = pygame.image.load('graphics/background_hall.png').convert()
-dumek_easy = pygame.image.load('graphics/dymek_easy.png').convert()
-dymek_medium = pygame.image.load('graphics/dymek_medium.png').convert()
-dymek_hard = pygame.image.load('graphics/dymek_hard.png').convert()
-dymek_learning = pygame.image.load('graphics/dymek_learning.png').convert()
+# dymek_easy = pygame.image.load('graphics/dymek_easy.png').convert()
+# dymek_medium = pygame.image.load('graphics/dymek_medium.png').convert()
+# dymek_hard = pygame.image.load('graphics/dymek_hard.png').convert()
+# dymek_learning = pygame.image.load('graphics/dymek_learning.png').convert()
 game_font = pygame.font.Font('fonts/Inconsolata-Bold.ttf',60)
 play_text = game_font.render('Play', False, 'Black')
 play_rect = play_text.get_rect(center = (400,300))
@@ -31,6 +32,7 @@ class Current_pos(Enum): #enum pozwala zamiast liczb używać niżej wypisanych 
     HALL = 6
     ABOUT_US =7
     LEARNING = 8
+    
 class Interface():
     def __init__(self):
         self.game_state = Current_pos.MENU  
@@ -41,7 +43,7 @@ class Interface():
             but_hall.draw_button()
             but_about_us.draw_button()
         elif self.game_state == Current_pos.MODE_CHOICE:
-            screen.blit(background_easy, (0, 0))
+            screen.blit(main.background_easy, (0, 0))
             but_easy.draw_button()
             but_medium.draw_button()
             but_hard.draw_button()
@@ -54,17 +56,21 @@ class Interface():
             screen.blit(background_hall, (0, 0))
             but_quit.draw_button()
         elif self.game_state == Current_pos.EASY:
-            screen.blit(background_easy, (0, 0))
-            but_back.draw_button()
+            main.play_game("EASY")
+            # screen.blit(main.background_easy, (0, 0))
+            # but_quit.draw_button()
         elif self.game_state == Current_pos.MEDIUM:
-            screen.blit(background_medium, (0, 0))
-            but_back.draw_button()
+            main.play_game("MEDIUM")
+            # screen.blit(main.background_medium, (0, 0))
+            # but_quit.draw_button()
         elif self.game_state == Current_pos.HARD:
-            screen.blit(background_hard, (0, 0))
-            but_back.draw_button()
+            main.play_game("HARD")
+            # screen.blit(main.background_hard, (0, 0))
+            # but_quit.draw_button()
         elif self.game_state == Current_pos.LEARNING:
-            screen.blit(background_learning, (0, 0))
-            but_back.draw_button()
+            main.play_game("LEARNING")
+            # screen.blit(main.background_learning, (0, 0))
+            # but_quit.draw_button()
 
 interface = Interface()
      
