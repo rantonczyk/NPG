@@ -4,11 +4,6 @@ pygame.init()
 # czcionka
 font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
 
-# wybieranie słów z bazy
-mode = "hard"
-with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
-    words = file.read().split("\n")
-
 # główne parametry ekranu
 clock = pygame.time.Clock()
 size = width, height = 1200, 800
@@ -34,7 +29,12 @@ def play_game(mode: str) -> None:
 
     # czcionka i prowizoryczna lista wyrazów
     text_font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
-    words = ["a", "abc", "trzy", "radek","michal","dwósłowne chasło","konstantynopol"]
+    
+    # wybieranie słów z bazy
+    if mode != "LEARNING":
+        with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
+            words = file.read().split("\n")
+    else: words = ["a", "b", "c", "d", "e"]
 
     # klasa przechowująca informacje o każdym z dymków
     class Falling_object:
