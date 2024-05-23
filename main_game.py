@@ -1,11 +1,8 @@
 import random, pygame, sys
 pygame.init()
 
-<<<<<<< HEAD
-# czcionka i prowizoryczna lista wyrazów
+# czcionka
 font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
-
-# words = ["a", "abc", "trzy", "radek","michal","dwósłowne chasło","konstantynopol"]
 
 # wybieranie słów z bazy
 mode = "hard"
@@ -13,36 +10,14 @@ with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
     words = file.read().split("\n")
 
 # główne parametry ekranu
-size = width, height = 1200, 800
-screen = pygame.display.set_mode(size)
-bg_learning = pygame.image.load("graphics/background_learning.png")
-=======
->>>>>>> origin/funkcyjnosc_gry
 clock = pygame.time.Clock()
 size = width, height = 1200, 800
-screen = pygame.display.set_mode((1200, 800))
+screen = pygame.display.set_mode(size)
 
-<<<<<<< HEAD
-# klasa przechowująca informacje o każdym z dymków
-class Falling_object:
-    # konstruktor
-    def __init__(self):
-        self.image = pygame.image.load("graphics/dymek_learning.png")
-        self.pos = self.image.get_rect().move(random.randrange(width - 250), 0)
-        self.text = words[random.randrange(len(words))]
-        self.text_surface = font.render(self.text, False, (0, 0, 0))
-        self.text_pos = self.text_surface.get_rect()
-        self.text_pos.center = self.pos.center
-    # przesuwanie całości w dół
-    def fall(self):
-        self.pos = self.pos.move(0, 1)
-        self.text_pos.center = self.pos.center
-=======
 background_easy = pygame.image.load('graphics/background_easy.png').convert()
 background_medium = pygame.image.load('graphics/background_medium.png').convert()
 background_hard = pygame.image.load('graphics/background_hard.png').convert()
 background_learning = pygame.image.load('graphics/background_learning.png').convert()
->>>>>>> origin/funkcyjnosc_gry
 
 dymek_easy = pygame.image.load('graphics/dymek_easy.png')
 dymek_medium = pygame.image.load('graphics/dymek_medium.png')
