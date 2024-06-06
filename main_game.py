@@ -30,7 +30,7 @@ def play_game(mode: str) -> None:
     # czcionka i prowizoryczna lista wyrazów
     text_font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
     
-    # wybieranie słów z bazy
+    # wybieranie słów z bazy("LEARNING" otwiera wszystkie trzy)
     if mode != "LEARNING":
         with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
             words = file.read().split("\n")
