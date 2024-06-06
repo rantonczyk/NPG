@@ -22,6 +22,12 @@ play_text = main.game_font.render('Play', False, 'Black')
 play_rect = play_text.get_rect(center = (400,300))
 mouse_pos = pygame.mouse.get_pos()
 
+# tworzenie 3 obiektów klasy Stats
+
+easyStats = main.stats.Stats()
+mediumStats = main.stats.Stats()
+hardStats = main.stats.Stats()
+
 # przeniesione do main_game
 # class Current_pos(Enum): #enum pozwala zamiast liczb używać niżej wypisanych nazw w celu poprawienia czytelności kodu
 #     MENU = 1
