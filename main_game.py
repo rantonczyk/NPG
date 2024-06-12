@@ -105,6 +105,14 @@ class Interface():
 
 interface = Interface()
 
+easy_stats = stats.Stats()
+medium_stats = stats.Stats()
+hard_stats = stats.Stats()
+
+easy_stats.get_stats('easy_stats.txt')
+medium_stats.get_stats('medium_stats.txt')
+hard_stats.get_stats('hard_stats.txt')
+
 def play_game(mode: str) -> None:
 
     # słownik z parametrami do każdego z trybów
@@ -151,15 +159,18 @@ def play_game(mode: str) -> None:
     falling_object_list = []
     score = 0
     lives = 3
+    bubbles_destroyed = 0
+
 
     # sprawdzenie czy wpisane słowo znajduje się na ekranie
-    def check_if_correct(text: str, score: float) -> float:
+    def check_if_correct(text: str, score: float, bubbles_destroyed: int) -> tuple:
         for elem in falling_object_list[:]:
             if elem.text == text:
                 score += len(elem.text) * parameters[mode][2]
+                bubbles_destroyed += 1
                 falling_object_list.remove(elem)
                 break
-        return score
+        return score, bubbles_destroyed
 
     input_box = pygame.Rect(width / 2 - 100, height - 100, 140, 32)
     text = ''
@@ -171,11 +182,17 @@ def play_game(mode: str) -> None:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 click_check(but_back, mouse_pos)
                 if interface.game_state == Current_pos.MODE_CHOICE:
+                    if mode == "EASY":
+                        easy_stats.update_stats(score, bubbles_destroyed, 'easy_stats.txt')
+                    elif mode == "MEDIUM":
+                        medium_stats.update_stats(score, bubbles_destroyed, 'medium_stats.txt')
+                    elif mode == "HARD":
+                        hard_stats.update_stats(score, bubbles_destroyed, 'hard_stats.txt')
                     # gracz wyszedł z gry -> zapisanie STANU GRY
                     return
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    score = check_if_correct(text, score)
+                    score, bubbles_destroyed = check_if_correct(text, score, bubbles_destroyed)
                     text = ''
                 elif event.key == pygame.K_BACKSPACE:
                     text = text[:-1]
