@@ -109,9 +109,9 @@ easy_stats = stats.Stats()
 medium_stats = stats.Stats()
 hard_stats = stats.Stats()
 
-easy_stats.get_stats('easy_stats.txt')
-medium_stats.get_stats('medium_stats.txt')
-hard_stats.get_stats('hard_stats.txt')
+easy_stats.get_stats('stats/easy_stats.txt')
+medium_stats.get_stats('stats/medium_stats.txt')
+hard_stats.get_stats('stats/hard_stats.txt')
 
 def play_game(mode: str) -> None:
 
@@ -182,12 +182,6 @@ def play_game(mode: str) -> None:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 click_check(but_back, mouse_pos)
                 if interface.game_state == Current_pos.MODE_CHOICE:
-                    if mode == "EASY":
-                        easy_stats.update_stats(score, bubbles_destroyed, 'easy_stats.txt')
-                    elif mode == "MEDIUM":
-                        medium_stats.update_stats(score, bubbles_destroyed, 'medium_stats.txt')
-                    elif mode == "HARD":
-                        hard_stats.update_stats(score, bubbles_destroyed, 'hard_stats.txt')
                     # gracz wyszedł z gry -> zapisanie STANU GRY
                     return
             elif event.type == pygame.KEYDOWN:
@@ -221,14 +215,18 @@ def play_game(mode: str) -> None:
                     falling_object_list.remove(falling_object_list[0])
                     falling_object_list.remove(falling_object_list[0])
         
-        # tylko w trybach wyzwania
-            if mode != "LEARNING":
-                if lives == 0:
-                    # print game over
-                    # save statistics
-                    # exit to main menu
-                    interface.game_state = Current_pos.MENU
-                    return
+        # koniec żyć - koniec gry
+        if mode != "LEARNING":
+            if lives == 0:
+                # print game over
+                if mode == "EASY":
+                    easy_stats.update_stats(score, bubbles_destroyed, 'stats/easy_stats.txt')
+                elif mode == "MEDIUM":
+                    medium_stats.update_stats(score, bubbles_destroyed, 'stats/medium_stats.txt')
+                elif mode == "HARD":
+                    hard_stats.update_stats(score, bubbles_destroyed, 'stats/hard_stats.txt')
+                interface.game_state = Current_pos.MENU
+                return
 
         # wyrysowanie okna do wpisywania wyrazów i przycisku powrotnego
         txt_surface = text_font.render(text, False, 'black')

@@ -22,7 +22,7 @@ class Stats:
             with open(filename, 'w') as file:
                 file.write(f"games_played={self.games_played}\n")
                 file.write(f"best_score={self.best_score}\n")
-                file.write(f"bubbles_destroyed={self.bubbles_destroyed}\n")  
+                file.write(f"bubbles_destroyed={self.bubbles_destroyed}")  
         except Exception as e:
             print(f"An unexpected error occurred while writing to the file: {e}")
 
@@ -35,7 +35,7 @@ class Stats:
                     if key == 'games_played':
                         self.games_played = int(value)
                     elif key == 'best_score':
-                        self.best_score = int(value)
+                        self.best_score = float(value)
                     elif key == 'bubbles_destroyed':  
                         self.bubbles_destroyed = int(value)
         except FileNotFoundError:
