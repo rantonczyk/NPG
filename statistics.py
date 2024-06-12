@@ -3,20 +3,17 @@ class Stats:
         # Inicjalizacja zmiennych przechowujących statystyki
         self.games_played = 0
         self.best_score = 0
-        self.current_score = 0
         self.bubbles_destroyed = 0  
 
     def reset_stats(self):
         # Zresetowanie statystyk
         self.games_played = 0
         self.best_score = 0
-        self.current_score = 0
         self.bubbles_destroyed = 0  
 
     def update_stats(self, score, bubbles_destroyed, filename):
         # Aktualizacja statystyk po zakończeniu gry
         self.games_played += 1
-        self.current_score = score
         self.bubbles_destroyed += bubbles_destroyed  
         if score > self.best_score:
             self.best_score = score
@@ -25,7 +22,6 @@ class Stats:
             with open(filename, 'w') as file:
                 file.write(f"games_played={self.games_played}\n")
                 file.write(f"best_score={self.best_score}\n")
-                file.write(f"current_score={self.current_score}\n")
                 file.write(f"bubbles_destroyed={self.bubbles_destroyed}\n")  
         except Exception as e:
             print(f"An unexpected error occurred while writing to the file: {e}")
@@ -40,8 +36,6 @@ class Stats:
                         self.games_played = int(value)
                     elif key == 'best_score':
                         self.best_score = int(value)
-                    elif key == 'current_score':
-                        self.current_score = int(value)
                     elif key == 'bubbles_destroyed':  
                         self.bubbles_destroyed = int(value)
         except FileNotFoundError:
