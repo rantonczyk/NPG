@@ -1,6 +1,7 @@
 import random, pygame, sys
 from enum import Enum
 import statistics as stats
+
 pygame.init()
 
 # czcionka
@@ -10,7 +11,7 @@ font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
 clock = pygame.time.Clock()
 size = width, height = 1200, 800
 screen = pygame.display.set_mode(size)
-game_font = pygame.font.Font('fonts/Inconsolata-Bold.ttf',60)
+game_font = pygame.font.Font('fonts/Inconsolata-Bold.ttf', 60)
 
 background_easy = pygame.image.load('graphics/background_easy.png').convert()
 background_medium = pygame.image.load('graphics/background_medium.png').convert()
@@ -24,59 +25,57 @@ dymek_medium = pygame.image.load('graphics/dymek_medium.png')
 dymek_hard = pygame.image.load('graphics/dymek_hard.png')
 dymek_learning = pygame.image.load('graphics/dymek_learning.png')
 
-class Current_pos(Enum): #enum pozwala zamiast liczb używać niżej wypisanych nazw w celu poprawienia czytelności kodu
+
+class Current_pos(Enum):  # enum pozwala zamiast liczb używać niżej wypisanych nazw w celu poprawienia czytelności kodu
     MENU = 1
     EASY = 2
     MEDIUM = 3
     HARD = 4
     MODE_CHOICE = 5
     HALL = 6
-    ABOUT_US =7
+    ABOUT_US = 7
     LEARNING = 8
 
+
 class Button:
-    def __init__(self, text: str, position: tuple, graphic, action, font_color ='Black', font=game_font) -> None: 
+    def __init__(self, text: str, position: tuple, graphic, action, font_color='Black', font=game_font) -> None:
         self.text = text
         self.font_color = font_color
         self.position = position
         self.font = font
         self.button_text = game_font.render(self.text, False, self.font_color)
-        self.button_rect = self.button_text.get_rect(center = (self.position))
+        self.button_rect = self.button_text.get_rect(center=(self.position))
         self.graphic = pygame.image.load(graphic).convert_alpha()
-        self.graphic_rect = self.graphic.get_rect(center = (self.position))
+        self.graphic_rect = self.graphic.get_rect(center=(self.position))
         self.action = action
-        
-        
+
     def draw_button(self):
-        # pygame.draw.rect(screen, self.infill_color, self.button_rect,10 )
-        # pygame.draw.rect(screen, self.infill_color, self.button_rect)
-        # pygame.draw.rect(screen,'Black', self.button_rect,2 )
-        screen.blit(self.graphic,self.graphic_rect)
-        screen.blit(self.button_text,self.button_rect)
-        
-    # def click_check(self, mouse_pos):
-    #     if self.button_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0] == 1: 
-    #         interface.game_state = self.action
+        screen.blit(self.graphic, self.graphic_rect)
+        screen.blit(self.button_text, self.button_rect)
+
 
 def click_check(button: Button, mouse_pos) -> None:
-    if button.button_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0] == 1: 
+    if button.button_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
         interface.game_state = button.action
 
+
 but_play = Button("Graj", (400, 300), 'graphics/dymek_easy.png', Current_pos.MODE_CHOICE, "Black")
-but_hall = Button("Wyniki", (400, 430),'graphics/dymek_easy.png', Current_pos.HALL, "Black")
-but_about_us = Button("O nas", (400, 560), 'graphics/dymek_easy.png',Current_pos.ABOUT_US, "Black")
+but_hall = Button("Wyniki", (400, 430), 'graphics/dymek_easy.png', Current_pos.HALL, "Black")
+but_about_us = Button("O nas", (400, 560), 'graphics/dymek_easy.png', Current_pos.ABOUT_US, "Black")
 but_quit = Button("Wyjdź", (600, 690), 'graphics/dymek_easy.png', Current_pos.MENU, "Black")
 but_easy = Button("Łatwy", (600, 240), 'graphics/dymek_easy.png', Current_pos.EASY, "Black")
-but_medium = Button("Średni", (600,370), 'graphics/dymek_easy.png',Current_pos.MEDIUM, "Black")
+but_medium = Button("Średni", (600, 370), 'graphics/dymek_easy.png', Current_pos.MEDIUM, "Black")
 but_hard = Button("Trudny", (600, 500), 'graphics/dymek_easy.png', Current_pos.HARD, "Black")
 but_learning = Button("Nauka", (600, 110), 'graphics/dymek_easy.png', Current_pos.LEARNING, "Black")
 but_back = Button("Powrót", (150, 700), 'graphics/dymek_hard.png', Current_pos.MODE_CHOICE, "Black")
 
+
 class Interface():
     def __init__(self):
-        self.game_state = Current_pos.MENU  
+        self.game_state = Current_pos.MENU
+
     def drawing(self):
-        if self.game_state == Current_pos.MENU: #na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
+        if self.game_state == Current_pos.MENU:  # na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
             screen.blit(background_menu, (0, 0))
             but_play.draw_button()
             but_hall.draw_button()
@@ -103,19 +102,19 @@ class Interface():
         elif self.game_state == Current_pos.LEARNING:
             play_game("LEARNING")
 
+
 interface = Interface()
 
-def play_game(mode: str) -> None:
-
+def play_game(mode: str, is_continued=False) -> None:
     # słownik z parametrami do każdego z trybów
     parameters = {"LEARNING": (background_learning, dymek_learning, 0),
-                "EASY": (background_easy, dymek_easy, 0.75),
-                "MEDIUM": (background_medium, dymek_medium, 1),
-                "HARD": (background_hard, dymek_hard, 1.5)}
+                  "EASY": (background_easy, dymek_easy, 0.75),
+                  "MEDIUM": (background_medium, dymek_medium, 1),
+                  "HARD": (background_hard, dymek_hard, 1.5)}
 
     # czcionka i prowizoryczna lista wyrazów
     text_font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
-    
+
     # wybieranie słów z bazy("LEARNING" otwiera wszystkie trzy)
     if mode != "LEARNING":
         with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
@@ -131,35 +130,91 @@ def play_game(mode: str) -> None:
     # klasa przechowująca informacje o każdym z dymków
     class Falling_object:
         # konstruktor
-        def __init__(self, mode):
+        def __init__(self, mode, x=None, y=None, text=None):
             self.image = parameters[mode][1]
-            self.pos = self.image.get_rect().move(random.randrange(width - 250), 0)
-            self.text = words[random.randrange(len(words))]
+            if x is None or y is None:
+                self.pos = self.image.get_rect().move(random.randrange(width - 250), 0)
+            else:
+                self.pos = self.image.get_rect().move(x, y)
+            if text is None:
+                self.text = words[random.randrange(len(words))]
+            else:
+                self.text = text
             self.text_surface = text_font.render(self.text, False, (0, 0, 0))
             self.text_pos = self.text_surface.get_rect()
             self.text_pos.center = self.pos.center
+
         # przesuwanie całości w dół
         def fall(self):
             self.pos = self.pos.move(0, 1)
             self.text_pos.center = self.pos.center
 
-    # sprawdzenie, czy jest rozpoczęta nowa gra, czy kontynuowana
-    # if(is_continued):
-    #     get_info_from_save_file
-    # else:
-    new_object_timer = 0
-    falling_object_list = []
-    score = 0
-    lives = 3
+    def save_game_state(mode, new_object_timer, score, lives, falling_object_list, bubbles_destroyed, is_saved=1):
+        with open('game_state.txt', 'w') as file:
+            file.write(f"is_saved={is_saved}\n")
+            file.write(f"mode={mode}\n")
+            file.write(f"new_object_timer={new_object_timer}\n")
+            file.write(f"score={score}\n")
+            file.write(f"bubbles_destroyed={bubbles_destroyed}\n")
+            file.write(f"lives={lives}\n")
+            for bubble in falling_object_list:
+                file.write(f"x_coordinate={bubble.pos.x}\n")
+                file.write(f"y_coordinate={bubble.pos.y}\n")
+                file.write(f"text={bubble.text}\n")
+
+    def load_game_state():
+        try:
+            with open('game_state.txt', 'r') as file:
+                lines = file.readlines()
+                state = {}
+                bubbles = []
+                for line in lines:
+                    if line.strip():
+                        key, value = line.strip().split('=')
+
+                        if key == 'is_saved':
+                            state[key] = int(value)
+                        elif key == 'mode':
+                            state[key] = value
+                        elif key == 'new_object_timer' or key == 'lives' or key == 'bubbles_destroyed':
+                            state[key] = int(value)
+                        elif key == 'score':
+                            state[key] = float(value)
+                        elif key == 'x_coordinate':
+                            x_coord = int(value)
+                            y_coord = int(lines[lines.index(line) + 1].strip().split('=')[1])
+                            text = lines[lines.index(line) + 2].strip().split('=')[1]
+                            bubbles.append(Falling_object(state['mode'], x_coord, y_coord, text))
+                state['bubbles'] = bubbles
+        except FileNotFoundError:
+            print("Plik nie istnieje, gra nie może się rozpocząć.")
+        return state
+
+    stan = load_game_state()
+    if stan['is_saved']:
+        mode = stan['mode']
+        new_object_timer = stan['new_object_timer']
+        score = stan['score']
+        lives = stan['lives']
+        bubbles_destroyed = stan['bubbles_destroyed']
+        falling_object_list = stan['bubbles']
+    else:
+        new_object_timer = 100
+        score = 0
+        lives = 3
+        bubbles_destroyed = 3
+        falling_object_list = []
+
 
     # sprawdzenie czy wpisane słowo znajduje się na ekranie
-    def check_if_correct(text: str, score: float) -> float:
+    def check_if_correct(text: str, score: float, bubbles_destroyed: int) -> tuple:
         for elem in falling_object_list[:]:
             if elem.text == text:
                 score += len(elem.text) * parameters[mode][2]
                 falling_object_list.remove(elem)
+                bubbles_destroyed+=1
                 break
-        return score
+        return score, bubbles_destroyed
 
     input_box = pygame.Rect(width / 2 - 100, height - 100, 140, 32)
     text = ''
@@ -172,16 +227,17 @@ def play_game(mode: str) -> None:
                 click_check(but_back, mouse_pos)
                 if interface.game_state == Current_pos.MODE_CHOICE:
                     # gracz wyszedł z gry -> zapisanie STANU GRY
+                    save_game_state(mode, new_object_timer, score, lives, falling_object_list,bubbles_destroyed ,1)
                     return
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    score = check_if_correct(text, score)
+                    score, bubbles_destroyed= check_if_correct(text, score,bubbles_destroyed)
                     text = ''
                 elif event.key == pygame.K_BACKSPACE:
                     text = text[:-1]
                 else:
                     text += event.unicode
-        
+
         mouse_pos = pygame.mouse.get_pos()
 
         # cykliczne tworzenie nowych obiektów
@@ -203,19 +259,19 @@ def play_game(mode: str) -> None:
                 if mode != "LEARNING":
                     falling_object_list.remove(falling_object_list[0])
                     falling_object_list.remove(falling_object_list[0])
-        
-        # tylko w trybach wyzwania
+
+            # tylko w trybach wyzwania
             if mode != "LEARNING":
                 if lives == 0:
-                    # print game over
                     # save statistics
-                    # exit to main menu
-                    interface.game_state = Current_pos.MENU
+                    interface.game_state = Current_pos.MODE_CHOICE
+                    #reset pliku zapisu, ustawienie flagi is_saved=0
+                    save_game_state(mode, new_object_timer, score, 3, falling_object_list,bubbles_destroyed ,0)
                     return
 
         # wyrysowanie okna do wpisywania wyrazów i przycisku powrotnego
         txt_surface = text_font.render(text, False, 'black')
-        text_box_width = max(200, txt_surface.get_width()+10)
+        text_box_width = max(200, txt_surface.get_width() + 10)
         input_box.w = text_box_width
         screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
         pygame.draw.rect(screen, 'black', input_box, 2)
