@@ -1,6 +1,7 @@
 import random, pygame, sys
 from enum import Enum
 import statistics as stats
+import os
 pygame.init()
 
 # czcionka
@@ -33,6 +34,7 @@ class Current_pos(Enum): #enum pozwala zamiast liczb używać niżej wypisanych 
     HALL = 6
     ABOUT_US =7
     LEARNING = 8
+    CONTINUE = 9
 
 class Button:
     def __init__(self, text: str, position: tuple, graphic, action, font_color ='Black', font=game_font) -> None: 
@@ -71,6 +73,7 @@ but_medium = Button("Średni", (600,370), 'graphics/dymek_easy.png',Current_pos.
 but_hard = Button("Trudny", (600, 500), 'graphics/dymek_easy.png', Current_pos.HARD, "Black")
 but_learning = Button("Nauka", (600, 110), 'graphics/dymek_easy.png', Current_pos.LEARNING, "Black")
 but_back = Button("Powrót", (150, 700), 'graphics/dymek_hard.png', Current_pos.MODE_CHOICE, "Black")
+but_continue = Button("Kontynuuj", (400, 370), 'graphics/dymek_easy.png', Current_pos.CONTINUE, "Black")  # Dodane
 
 class Interface():
     def __init__(self):
@@ -79,6 +82,8 @@ class Interface():
         if self.game_state == Current_pos.MENU: #na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
             screen.blit(background_menu, (0, 0))
             but_play.draw_button()
+            if save_exists():  # Dodane
+                but_continue.draw_button()  # Dodane
             but_hall.draw_button()
             but_about_us.draw_button()
         elif self.game_state == Current_pos.MODE_CHOICE:
@@ -105,13 +110,29 @@ class Interface():
 
 interface = Interface()
 
+easy_stats_file = os.path.join('stats', 'easy_stats.txt')
+medium_stats_file = os.path.join('stats', 'medium_stats.txt')
+hard_stats_file = os.path.join('stats', 'hard_stats.txt')
+
 easy_stats = stats.Stats()
 medium_stats = stats.Stats()
 hard_stats = stats.Stats()
 
-easy_stats.get_stats('easy_stats.txt')
-medium_stats.get_stats('medium_stats.txt')
-hard_stats.get_stats('hard_stats.txt')
+easy_stats.get_stats(easy_stats_file)
+medium_stats.get_stats(medium_stats_file)
+hard_stats.get_stats(hard_stats_file)
+
+def save_exists():  # Dodane
+    return os.path.exists('savegame.txt')
+
+def load_game():  # Dodane
+    with open('savegame.txt', 'r') as file:
+        mode, score, lives, bubbles_destroyed = file.readline().split(',')
+        play_game(mode, int(score), int(lives), int(bubbles_destroyed))
+
+def save_game(mode, score, lives, bubbles_destroyed):  # Dodane
+    with open('savegame.txt', 'w') as file:
+        file.write(f"{mode},{score},{lives},{bubbles_destroyed}")
 
 def play_game(mode: str) -> None:
 
@@ -189,6 +210,7 @@ def play_game(mode: str) -> None:
                     elif mode == "HARD":
                         hard_stats.update_stats(score, bubbles_destroyed, 'hard_stats.txt')
                     # gracz wyszedł z gry -> zapisanie STANU GRY
+                    save_game(mode, score, lives, bubbles_destroyed)  # Dodane
                     return
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
