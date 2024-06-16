@@ -26,6 +26,7 @@ dymek_easy = pygame.image.load('graphics/dymek_easy.png')
 dymek_medium = pygame.image.load('graphics/dymek_medium.png')
 dymek_hard = pygame.image.load('graphics/dymek_hard.png')
 dymek_learning = pygame.image.load('graphics/dymek_learning.png')
+dymek_resized = pygame.image.load('graphics/dymek_resized.png')
 
 
 class Current_pos(Enum):  # enum pozwala zamiast liczb używać niżej wypisanych nazw w celu poprawienia czytelności kodu
@@ -42,6 +43,7 @@ class Current_pos(Enum):  # enum pozwala zamiast liczb używać niżej wypisanyc
     RETURN = 11 # powrot
     SAVE = 12 # zapis stanu gry
     DELETE_SAVE = 13 # "nadpisanie" stanu gry, efektywnie jest on usuwany
+    CONTINUE = 14
 
 
 class Button:
@@ -81,6 +83,18 @@ but_reset_score_no = Button("Nie", (600, 670), 'graphics/dymek_easy.png', Curren
 but_back = Button("Zakończ", (150, 700), 'graphics/dymek_hard.png', Current_pos.RETURN, "Black") # powrot
 but_yes = Button("Tak", (400, 450), 'graphics/dymek_hard.png', Current_pos.SAVE, "Black") #powrot
 but_no = Button("Nie", (800, 450), 'graphics/dymek_hard.png', Current_pos.DELETE_SAVE, "Black") #powrot
+but_continue = Button("Kontynuuj", (400, 700), 'graphics/dymek_resized.png', Current_pos.CONTINUE, "Black")
+
+def is_save_available():
+    try:
+        with open('game_state.txt', 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                if "is_saved=1" in line:
+                    return True
+        return False
+    except FileNotFoundError:
+        return False
 
 class Interface():
     def __init__(self):
@@ -91,7 +105,11 @@ class Interface():
     def drawing(self):
         if self.game_state == Current_pos.MENU:  # na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
             screen.blit(background_menu, (0, 0))
-            self.buttons = [but_play, but_hall, but_about_us]
+            if is_save_available():
+                self.buttons = [but_play, but_hall, but_about_us, but_continue]
+                but_continue.draw_button()
+            else:
+                self.buttons = [but_play, but_hall, but_about_us]
             but_play.draw_button()
             but_hall.draw_button()
             but_about_us.draw_button()
@@ -107,6 +125,18 @@ class Interface():
             screen.blit(background_menu, (0, 0))
             self.buttons = [but_quit]
             but_quit.draw_button()
+            about_us_text = [
+
+                "Jesteśmy zespołem pasjonatów programowania.",
+                "Naszym celem jest tworzenie gier, które edukują i bawią.",
+                "Dziękujemy za grę i mamy nadzieję, że Ci się podoba!",
+                "",
+                "Radek Antończyk, Michał Barnaś, Julia Brąglewicz,",
+                "Kacper Basoń, Mateusz Dańków"
+            ]
+            for i, line in enumerate(about_us_text):
+                text_surface = font.render(line, True, (0, 0, 0))
+                screen.blit(text_surface, (190, 395 + i * 40))
         elif self.game_state == Current_pos.HALL:
             screen.blit(background_hall, (0, 0))
             # wypisanie statystyk EASY
@@ -169,6 +199,8 @@ class Interface():
             elif self.last_mode == "HARD":
                 hard_stats.update_stats(self.save_info[0], self.save_info[1], 'stats/hard_stats.txt')
             self.game_state = Current_pos.MENU
+        elif self.game_state == Current_pos.CONTINUE:
+            self.save_info = play_game("CONTINUE", True)
 
 interface = Interface()
 
@@ -230,10 +262,6 @@ class Falling_object:
             self.pos = self.image.get_rect().move(random.randrange(width - 250), 0)
         else:
             self.pos = self.image.get_rect().move(x, y)
-        # w teorii niepotrzebne
-        # if text is None:
-        #     self.text = words[random.randrange(len(words))]
-        # else:
         self.text = text
         self.text_surface = font.render(self.text, False, (0, 0, 0))
         self.text_pos = self.text_surface.get_rect()
@@ -251,24 +279,6 @@ parameters = {"LEARNING": (background_learning, dymek_learning, 0),
                 "HARD": (background_hard, dymek_hard, 1.5)}
 
 def play_game(mode: str, is_continued=False) -> tuple[float, int]:
-
-    # # słownik z parametrami do każdego z trybów
-    # parameters = {"LEARNING": (background_learning, dymek_learning, 0),
-    #               "EASY": (background_easy, dymek_easy, 0.75),
-    #               "MEDIUM": (background_medium, dymek_medium, 1),
-    #               "HARD": (background_hard, dymek_hard, 1.5)}
-
-    # wybieranie słów z bazy("LEARNING" otwiera wszystkie trzy)
-    if mode != "LEARNING":
-        with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
-            words = file.read().split("\n")
-    else:
-        with open("word_base/easy.txt", "r", encoding="UTF-8") as file:
-            words = file.read().split("\n")
-        with open("word_base/medium.txt", "r", encoding="UTF-8") as file:
-            words += file.read().split("\n")
-        with open("word_base/hard.txt", "r", encoding="UTF-8") as file:
-            words += file.read().split("\n")
 
     # klasa przechowująca informacje o każdym z dymków
     class Falling_object:
@@ -292,47 +302,6 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
             self.pos = self.pos.move(0, 1)
             self.text_pos.center = self.pos.center
 
-    # def save_game_state(mode, new_object_timer, score, lives, falling_object_list, bubbles_destroyed, is_saved=1):
-    #     with open('game_state.txt', 'w') as file:
-    #         file.write(f"is_saved={is_saved}\n")
-    #         file.write(f"mode={mode}\n")
-    #         file.write(f"new_object_timer={new_object_timer}\n")
-    #         file.write(f"score={score}\n")
-    #         file.write(f"bubbles_destroyed={bubbles_destroyed}\n")
-    #         file.write(f"lives={lives}\n")
-    #         for bubble in falling_object_list:
-    #             file.write(f"x_coordinate={bubble.pos.x}\n")
-    #             file.write(f"y_coordinate={bubble.pos.y}\n")
-    #             file.write(f"text={bubble.text}\n")
-
-    # def load_game_state():
-    #     try:
-    #         with open('game_state.txt', 'r') as file:
-    #             lines = file.readlines()
-    #             state = {}
-    #             bubbles = []
-    #             for line in lines:
-    #                 if line.strip():
-    #                     key, value = line.strip().split('=')
-
-    #                     if key == 'is_saved':
-    #                         state[key] = int(value)
-    #                     elif key == 'mode':
-    #                         state[key] = value
-    #                     elif key == 'new_object_timer' or key == 'lives' or key == 'bubbles_destroyed':
-    #                         state[key] = int(value)
-    #                     elif key == 'score':
-    #                         state[key] = float(value)
-    #                     elif key == 'x_coordinate':
-    #                         x_coord = int(value)
-    #                         y_coord = int(lines[lines.index(line) + 1].strip().split('=')[1])
-    #                         text = lines[lines.index(line) + 2].strip().split('=')[1]
-    #                         bubbles.append(Falling_object(state['mode'], x_coord, y_coord, text))
-    #             state['bubbles'] = bubbles
-    #     except FileNotFoundError:
-    #         print("Plik nie istnieje, gra nie może się rozpocząć.")
-    #     return state
-
     stan = load_game_state()
     if stan['is_saved'] and is_continued:
         mode = stan['mode']
@@ -348,6 +317,17 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
         bubbles_destroyed = 0
         falling_object_list = []
 
+    # wybieranie słów z bazy("LEARNING" otwiera wszystkie trzy)
+    if mode != "LEARNING":
+        with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
+            words = file.read().split("\n")
+    else:
+        with open("word_base/easy.txt", "r", encoding="UTF-8") as file:
+            words = file.read().split("\n")
+        with open("word_base/medium.txt", "r", encoding="UTF-8") as file:
+            words += file.read().split("\n")
+        with open("word_base/hard.txt", "r", encoding="UTF-8") as file:
+            words += file.read().split("\n")
 
     # sprawdzenie czy wpisane słowo znajduje się na ekranie
     def check_if_correct(text: str, score: float, bubbles_destroyed: int) -> tuple:
@@ -378,6 +358,9 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
                     text += event.unicode
 
         if interface.game_state == Current_pos.RETURN:
+            if mode == "LEARNING":
+                interface.game_state = Current_pos.MODE_CHOICE
+                return 0, 0
             save_game_state(mode, new_object_timer, score, lives, falling_object_list,bubbles_destroyed)
             return score, bubbles_destroyed
 
