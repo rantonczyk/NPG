@@ -139,18 +139,6 @@ def play_game(mode: str, is_continued=False):
     # czcionka i prowizoryczna lista wyrazów
     text_font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
 
-    # wybieranie słów z bazy("LEARNING" otwiera wszystkie trzy)
-    if mode != "LEARNING":
-        with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
-            words = file.read().split("\n")
-    else:
-        with open("word_base/easy.txt", "r", encoding="UTF-8") as file:
-            words = file.read().split("\n")
-        with open("word_base/medium.txt", "r", encoding="UTF-8") as file:
-            words += file.read().split("\n")
-        with open("word_base/hard.txt", "r", encoding="UTF-8") as file:
-            words += file.read().split("\n")
-
     # klasa przechowująca informacje o każdym z dymków
     class Falling_object:
         def __init__(self, mode, x=None, y=None, text=None):
@@ -214,7 +202,7 @@ def play_game(mode: str, is_continued=False):
         return state
     
     stan = load_game_state()
-    if stan['is_saved']:
+    if stan['is_saved'] and is_continued:
         mode = stan['mode']
         new_object_timer = stan['new_object_timer']
         score = stan['score']
@@ -227,6 +215,18 @@ def play_game(mode: str, is_continued=False):
         lives = 3
         bubbles_destroyed = 3
         falling_object_list = []
+
+    # wybieranie słów z bazy("LEARNING" otwiera wszystkie trzy)
+    if mode != "LEARNING":
+        with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
+            words = file.read().split("\n")
+    else:
+        with open("word_base/easy.txt", "r", encoding="UTF-8") as file:
+            words = file.read().split("\n")
+        with open("word_base/medium.txt", "r", encoding="UTF-8") as file:
+            words += file.read().split("\n")
+        with open("word_base/hard.txt", "r", encoding="UTF-8") as file:
+            words += file.read().split("\n")
 
     # sprawdzenie czy wpisane słowo znajduje się na ekranie
     def check_if_correct(text: str, score: float, bubbles_destroyed: int) -> tuple:
