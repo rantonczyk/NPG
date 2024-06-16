@@ -5,11 +5,12 @@ class Stats:
         self.best_score = 0
         self.bubbles_destroyed = 0  
 
-    def reset_stats(self):
+    def reset_stats(self, filename):
         # Zresetowanie statystyk
         self.games_played = 0
         self.best_score = 0
-        self.bubbles_destroyed = 0  
+        self.bubbles_destroyed = 0
+        self.save_to_file(filename)
 
     def update_stats(self, score, bubbles_destroyed, filename):
         # Aktualizacja statystyk po zakończeniu gry
@@ -17,7 +18,9 @@ class Stats:
         self.bubbles_destroyed += bubbles_destroyed  
         if score > self.best_score:
             self.best_score = score
+        self.save_to_file(filename)
 
+    def save_to_file(self, filename):
         try:
             with open(filename, 'w') as file:
                 file.write(f"games_played={self.games_played}\n")

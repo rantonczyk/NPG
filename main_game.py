@@ -3,8 +3,9 @@ from enum import Enum
 import statistics as stats
 pygame.init()
 
-# czcionka
+# czcionki
 font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
+bigger_font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 48)
 
 # główne parametry ekranu
 clock = pygame.time.Clock()
@@ -33,6 +34,8 @@ class Current_pos(Enum): #enum pozwala zamiast liczb używać niżej wypisanych 
     HALL = 6
     ABOUT_US =7
     LEARNING = 8
+    SCORE_RESET = 9
+    RESET_SCORE_YES = 10
 
 class Button:
     def __init__(self, text: str, position: tuple, graphic, action, font_color ='Black', font=game_font) -> None: 
@@ -71,18 +74,25 @@ but_medium = Button("Średni", (600,370), 'graphics/dymek_easy.png',Current_pos.
 but_hard = Button("Trudny", (600, 500), 'graphics/dymek_easy.png', Current_pos.HARD, "Black")
 but_learning = Button("Nauka", (600, 110), 'graphics/dymek_easy.png', Current_pos.LEARNING, "Black")
 but_back = Button("Powrót", (150, 700), 'graphics/dymek_hard.png', Current_pos.MODE_CHOICE, "Black")
+but_quit_score = Button("Wyjdź", (250, 690), 'graphics/dymek_easy.png', Current_pos.MENU, "Black")
+but_reset_score = Button("Wyczyść", (950, 690), 'graphics/dymek_easy.png', Current_pos.SCORE_RESET, "Black")
+but_reset_score_yes = Button("Tak", (600, 550), 'graphics/dymek_hard.png', Current_pos.RESET_SCORE_YES, "Black")
+but_reset_score_no = Button("Nie", (600, 670), 'graphics/dymek_easy.png', Current_pos.HALL, "Black")
 
 class Interface():
     def __init__(self):
         self.game_state = Current_pos.MENU  
+        self.buttons = [but_play, but_hall, but_about_us]
     def drawing(self):
         if self.game_state == Current_pos.MENU: #na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
             screen.blit(background_menu, (0, 0))
+            self.buttons = [but_play, but_hall, but_about_us]
             but_play.draw_button()
             but_hall.draw_button()
             but_about_us.draw_button()
         elif self.game_state == Current_pos.MODE_CHOICE:
             screen.blit(background_easy, (0, 0))
+            self.buttons = [but_easy, but_medium, but_hard, but_learning, but_quit]
             but_easy.draw_button()
             but_medium.draw_button()
             but_hard.draw_button()
@@ -90,10 +100,28 @@ class Interface():
             but_quit.draw_button()
         elif self.game_state == Current_pos.ABOUT_US:
             screen.blit(background_menu, (0, 0))
+            self.buttons = [but_quit]
             but_quit.draw_button()
         elif self.game_state == Current_pos.HALL:
             screen.blit(background_hall, (0, 0))
-            but_quit.draw_button()
+            # wypisanie statystyk EASY
+            screen.blit(bigger_font.render(f"Łatwy", False, (48, 205, 214)), (550, 280))
+            screen.blit(font.render(f"Ilość gier: {easy_stats.games_played}", False, (0, 0, 0)), (480, 330))
+            screen.blit(font.render(f"Najlepszy wynik: {easy_stats.best_score}", False, (0, 0, 0)), (480, 360))
+            screen.blit(font.render(f"Zniszczone dymki: {easy_stats.bubbles_destroyed}", False, (0, 0, 0)), (480, 390))
+            # wypisanie statystyk MEDIUM
+            screen.blit(bigger_font.render(f"Średni", False, (48, 73, 171)), (550, 440))
+            screen.blit(font.render(f"Ilość gier: {medium_stats.games_played}", False, (0, 0, 0)), (480, 490))
+            screen.blit(font.render(f"Najlepszy wynik: {medium_stats.best_score}", False, (0, 0, 0)), (480, 520))
+            screen.blit(font.render(f"Zniszczone dymki: {medium_stats.bubbles_destroyed}", False, (0, 0, 0)), (480, 550))
+            # wypisanie statystyk HARD
+            screen.blit(bigger_font.render(f"Trudny", False, (213, 24, 54)), (550, 600))
+            screen.blit(font.render(f"Ilość gier: {hard_stats.games_played}", False, (0, 0, 0)), (480, 650))
+            screen.blit(font.render(f"Najlepszy wynik: {hard_stats.best_score}", False, (0, 0, 0)), (480, 680))
+            screen.blit(font.render(f"Zniszczone dymki: {hard_stats.bubbles_destroyed}", False, (0, 0, 0)), (480, 710))
+            self.buttons = [but_quit_score, but_reset_score]
+            but_quit_score.draw_button()
+            but_reset_score.draw_button()
         elif self.game_state == Current_pos.EASY:
             play_game("EASY")
         elif self.game_state == Current_pos.MEDIUM:
@@ -102,6 +130,20 @@ class Interface():
             play_game("HARD")
         elif self.game_state == Current_pos.LEARNING:
             play_game("LEARNING")
+        elif self.game_state == Current_pos.SCORE_RESET:
+            screen.blit(background_hall, (0, 0))
+            self.buttons = [but_reset_score_yes, but_reset_score_no]
+            screen.blit(bigger_font.render(f"Czy na pewno", False, (0, 0, 0)), (480, 320))
+            screen.blit(bigger_font.render(f"chcesz usunąć", False, (0, 0, 0)), (480, 370))
+            screen.blit(bigger_font.render(f"statystyki?", False, (0, 0, 0)), (480, 420))
+            but_reset_score_no.draw_button()
+            but_reset_score_yes.draw_button()
+        elif self.game_state == Current_pos.RESET_SCORE_YES:
+            easy_stats.reset_stats('stats/easy_stats.txt')
+            medium_stats.reset_stats('stats/medium_stats.txt')
+            hard_stats.reset_stats('stats/hard_stats.txt')
+            self.game_state = Current_pos.HALL
+
 
 interface = Interface()
 
@@ -121,9 +163,6 @@ def play_game(mode: str) -> None:
                 "MEDIUM": (background_medium, dymek_medium, 1),
                 "HARD": (background_hard, dymek_hard, 1.5)}
 
-    # czcionka i prowizoryczna lista wyrazów
-    text_font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
-    
     # wybieranie słów z bazy("LEARNING" otwiera wszystkie trzy)
     if mode != "LEARNING":
         with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
@@ -143,7 +182,7 @@ def play_game(mode: str) -> None:
             self.image = parameters[mode][1]
             self.pos = self.image.get_rect().move(random.randrange(width - 250), 0)
             self.text = words[random.randrange(len(words))]
-            self.text_surface = text_font.render(self.text, False, (0, 0, 0))
+            self.text_surface = font.render(self.text, False, (0, 0, 0))
             self.text_pos = self.text_surface.get_rect()
             self.text_pos.center = self.pos.center
         # przesuwanie całości w dół
@@ -229,7 +268,7 @@ def play_game(mode: str) -> None:
                 return
 
         # wyrysowanie okna do wpisywania wyrazów i przycisku powrotnego
-        txt_surface = text_font.render(text, False, 'black')
+        txt_surface = font.render(text, False, 'black')
         text_box_width = max(200, txt_surface.get_width()+10)
         input_box.w = text_box_width
         screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
@@ -239,8 +278,8 @@ def play_game(mode: str) -> None:
         # wypisanie aktualnego wyniku i liczby żyć
         if mode != "LEARNING":
             screen.blit(dymek_hard, (950, 655))
-            screen.blit(text_font.render(f"Życia: {lives}", False, (0, 0, 0)), (980, 675))
-            screen.blit(text_font.render(f"Punkty: {score}", False, (0, 0, 0)), (980, 705))
+            screen.blit(font.render(f"Życia: {lives}", False, (0, 0, 0)), (980, 675))
+            screen.blit(font.render(f"Punkty: {score}", False, (0, 0, 0)), (980, 705))
 
         pygame.display.flip()
         clock.tick(60)
