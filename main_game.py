@@ -87,6 +87,7 @@ class Interface():
         self.game_state = Current_pos.MENU  
         self.buttons = [but_play, but_hall, but_about_us]
         self.last_mode = None
+        self.save_info = (None, None)
     def drawing(self):
         if self.game_state == Current_pos.MENU:  # na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
             screen.blit(background_menu, (0, 0))
@@ -134,15 +135,15 @@ class Interface():
             but_no.draw_button()
         elif self.game_state == Current_pos.EASY:
             self.last_mode = "EASY"
-            play_game("EASY")
+            self.save_info = play_game("EASY")
         elif self.game_state == Current_pos.MEDIUM:
             self.last_mode = "MEDIUM"
-            play_game("MEDIUM")
+            self.save_info = play_game("MEDIUM")
         elif self.game_state == Current_pos.HARD:
             self.last_mode = "HARD"
-            play_game("HARD")
+            self.save_info = play_game("HARD")
         elif self.game_state == Current_pos.LEARNING:
-            play_game("LEARNING")
+            self.save_info = play_game("LEARNING")
         elif self.game_state == Current_pos.SCORE_RESET:
             screen.blit(background_hall, (0, 0))
             self.buttons = [but_reset_score_yes, but_reset_score_no]
@@ -162,16 +163,12 @@ class Interface():
         elif self.game_state == Current_pos.DELETE_SAVE:
             save_game_state(0, 0, 0, 0, [], 0, 0)
             if self.last_mode == "EASY":
-                easy_stats.update_stats(final_score, final_bubbles, 'stats/easy_stats.txt')
+                easy_stats.update_stats(self.save_info[0], self.save_info[1], 'stats/easy_stats.txt')
             elif self.last_mode == "MEDIUM":
-                medium_stats.update_stats(final_score, final_bubbles, 'stats/medium_stats.txt')
+                medium_stats.update_stats(self.save_info[0], self.save_info[1], 'stats/medium_stats.txt')
             elif self.last_mode == "HARD":
-                hard_stats.update_stats(final_score, final_bubbles, 'stats/hard_stats.txt')
+                hard_stats.update_stats(self.save_info[0], self.save_info[1], 'stats/hard_stats.txt')
             self.game_state = Current_pos.MENU
-
-# zmienne potrzebne do aktualizacji statystyk
-final_score = 0
-final_bubbles = 0
 
 interface = Interface()
 
@@ -253,7 +250,7 @@ parameters = {"LEARNING": (background_learning, dymek_learning, 0),
                 "MEDIUM": (background_medium, dymek_medium, 1),
                 "HARD": (background_hard, dymek_hard, 1.5)}
 
-def play_game(mode: str, is_continued=False) -> None:
+def play_game(mode: str, is_continued=False) -> tuple[float, int]:
 
     # # słownik z parametrami do każdego z trybów
     # parameters = {"LEARNING": (background_learning, dymek_learning, 0),
@@ -359,7 +356,6 @@ def play_game(mode: str, is_continued=False) -> None:
                 score += len(elem.text) * parameters[mode][2]
                 bubbles_destroyed += 1
                 falling_object_list.remove(elem)
-                bubbles_destroyed+=1
                 break
         return score, bubbles_destroyed
 
@@ -383,9 +379,7 @@ def play_game(mode: str, is_continued=False) -> None:
 
         if interface.game_state == Current_pos.RETURN:
             save_game_state(mode, new_object_timer, score, lives, falling_object_list,bubbles_destroyed)
-            final_score = score
-            final_bubbles = bubbles_destroyed
-            return
+            return score, bubbles_destroyed
 
         mouse_pos = pygame.mouse.get_pos()
 
