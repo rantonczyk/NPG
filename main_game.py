@@ -6,6 +6,7 @@ pygame.init()
 # czcionki
 font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 32)
 bigger_font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 48)
+big_font = pygame.font.SysFont("fonts/Inconsolata-Bold.ttf", 64)
 
 # główne parametry ekranu
 clock = pygame.time.Clock()
@@ -129,6 +130,7 @@ class Interface():
         elif self.game_state == Current_pos.RETURN: #powrot
             self.buttons = [but_yes, but_no]
             screen.blit(background_menu, (0, 0))
+            screen.blit(big_font.render(f"Czy chcesz zapisać stan gry?", False, ((0, 0, 0))), (285, 300))
             but_yes.draw_button()
             but_no.draw_button()
         elif self.game_state == Current_pos.EASY:
@@ -230,7 +232,7 @@ def play_game(mode: str) -> None:
             if event.type == pygame.QUIT: sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 click_check(but_back, mouse_pos)
-                if interface.game_state == Current_pos.MODE_CHOICE:
+                if interface.game_state == Current_pos.RETURN:
                     # gracz wyszedł z gry -> zapisanie STANU GRY
                     return
             elif event.type == pygame.KEYDOWN:
