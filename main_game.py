@@ -38,6 +38,7 @@ class Current_pos(Enum): #enum pozwala zamiast liczb używać niżej wypisanych 
     SCORE_RESET = 9
     RESET_SCORE_YES = 10
     RETURN = 11 # powrot
+    SAVE = 12 # zapis stanu gry
 
 class Button:
     def __init__(self, text: str, position: tuple, graphic, action, font_color ='Black', font=game_font) -> None: 
@@ -79,8 +80,8 @@ but_quit_score = Button("Wyjdź", (250, 690), 'graphics/dymek_easy.png', Current
 but_reset_score = Button("Wyczyść", (950, 690), 'graphics/dymek_easy.png', Current_pos.SCORE_RESET, "Black")
 but_reset_score_yes = Button("Tak", (600, 550), 'graphics/dymek_hard.png', Current_pos.RESET_SCORE_YES, "Black")
 but_reset_score_no = Button("Nie", (600, 670), 'graphics/dymek_easy.png', Current_pos.HALL, "Black")
-but_back = Button("Powrót", (150, 700), 'graphics/dymek_hard.png', Current_pos.RETURN, "Black") # powrot
-but_yes = Button("Tak", (400, 450), 'graphics/dymek_hard.png', Current_pos.MENU, "Black") #powrot
+but_back = Button("Zakończ", (150, 700), 'graphics/dymek_hard.png', Current_pos.RETURN, "Black") # powrot
+but_yes = Button("Tak", (400, 450), 'graphics/dymek_hard.png', Current_pos.SAVE, "Black") #powrot
 but_no = Button("Nie", (800, 450), 'graphics/dymek_hard.png', Current_pos.MENU, "Black") #powrot
 
 class Interface():
@@ -126,10 +127,9 @@ class Interface():
             self.buttons = [but_quit_score, but_reset_score]
             but_quit_score.draw_button()
             but_reset_score.draw_button()
-            but_quit.draw_button()
         elif self.game_state == Current_pos.RETURN: #powrot
             self.buttons = [but_yes, but_no]
-            screen.blit(background_menu, (0, 0))
+            screen.blit(background_easy, (0, 0))
             screen.blit(big_font.render(f"Czy chcesz zapisać stan gry?", False, ((0, 0, 0))), (285, 300))
             but_yes.draw_button()
             but_no.draw_button()
@@ -154,6 +154,9 @@ class Interface():
             medium_stats.reset_stats('stats/medium_stats.txt')
             hard_stats.reset_stats('stats/hard_stats.txt')
             self.game_state = Current_pos.HALL
+        elif self.game_state == Current_pos.SAVE:
+            #zapisz statystyki
+            self.game_state = Current_pos.MENU
 
 
 
@@ -233,7 +236,6 @@ def play_game(mode: str) -> None:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 click_check(but_back, mouse_pos)
                 if interface.game_state == Current_pos.RETURN:
-                    # gracz wyszedł z gry -> zapisanie STANU GRY
                     return
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
