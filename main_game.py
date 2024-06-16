@@ -28,8 +28,7 @@ dymek_hard = pygame.image.load('graphics/dymek_hard.png')
 dymek_learning = pygame.image.load('graphics/dymek_learning.png')
 dymek_resized = pygame.image.load('graphics/dymek_resized.png')
 
-
-class Current_pos(Enum):  # enum pozwala zamiast liczb używać niżej wypisanych nazw w celu poprawienia czytelności kodu
+class Current_pos(Enum):   # enum pozwala zamiast liczb używać niżej wypisanych nazw w celu poprawienia czytelności kodu
     MENU = 1
     EASY = 2
     MEDIUM = 3
@@ -44,7 +43,6 @@ class Current_pos(Enum):  # enum pozwala zamiast liczb używać niżej wypisanyc
     SAVE = 12 # zapis stanu gry
     DELETE_SAVE = 13 # "nadpisanie" stanu gry, efektywnie jest on usuwany
     CONTINUE = 14
-
 
 class Button:
     def __init__(self, text: str, position: tuple, graphic, action, font_color='Black', font=game_font) -> None:
@@ -62,11 +60,9 @@ class Button:
         screen.blit(self.graphic, self.graphic_rect)
         screen.blit(self.button_text, self.button_rect)
 
-
 def click_check(button: Button, mouse_pos) -> None:
     if button.button_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
         interface.game_state = button.action
-
 
 but_play = Button("Graj", (400, 300), 'graphics/dymek_easy.png', Current_pos.MODE_CHOICE, "Black")
 but_hall = Button("Wyniki", (400, 430), 'graphics/dymek_easy.png', Current_pos.HALL, "Black")
@@ -103,7 +99,7 @@ class Interface():
         self.last_mode = None
         self.save_info = (None, None)
     def drawing(self):
-        if self.game_state == Current_pos.MENU:  # na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
+        if self.game_state == Current_pos.MENU:   # na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
             screen.blit(background_menu, (0, 0))
             if is_save_available():
                 self.buttons = [but_play, but_hall, but_about_us, but_continue]
@@ -282,7 +278,6 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
 
     # klasa przechowująca informacje o każdym z dymków
     class Falling_object:
-        # konstruktor
         def __init__(self, mode, x=None, y=None, text=None):
             self.image = parameters[mode][1]
             if x is None or y is None:
@@ -334,16 +329,16 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
         for elem in falling_object_list[:]:
             if elem.text == text:
                 score += len(elem.text) * parameters[mode][2]
-                bubbles_destroyed += 1
                 falling_object_list.remove(elem)
+                bubbles_destroyed += 1
                 break
         return score, bubbles_destroyed
 
     input_box = pygame.Rect(width / 2 - 100, height - 100, 140, 32)
     text = ''
-
+    
+    # sprawdzanie, czy naciśnięto jakiś przycisk i odpowiednie akcje z tym związane
     while True:
-        # sprawdzanie, czy naciśnięto jakiś przycisk i odpowiednie akcje z tym związane
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -385,7 +380,6 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
                 if mode != "LEARNING":
                     falling_object_list.remove(falling_object_list[0])
                     falling_object_list.remove(falling_object_list[0])
-
         # tylko w trybach wyzwania, koniec żyć - koniec gry
         if mode in ["EASY", "MEDIUM", "HARD"]:
             if lives == 0:
