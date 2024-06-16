@@ -33,6 +33,7 @@ class Current_pos(Enum): #enum pozwala zamiast liczb używać niżej wypisanych 
     HALL = 6
     ABOUT_US =7
     LEARNING = 8
+    RETURN = 9 # powrot
 
 class Button:
     def __init__(self, text: str, position: tuple, graphic, action, font_color ='Black', font=game_font) -> None: 
@@ -70,7 +71,9 @@ but_easy = Button("Łatwy", (600, 240), 'graphics/dymek_easy.png', Current_pos.E
 but_medium = Button("Średni", (600,370), 'graphics/dymek_easy.png',Current_pos.MEDIUM, "Black")
 but_hard = Button("Trudny", (600, 500), 'graphics/dymek_easy.png', Current_pos.HARD, "Black")
 but_learning = Button("Nauka", (600, 110), 'graphics/dymek_easy.png', Current_pos.LEARNING, "Black")
-but_back = Button("Powrót", (150, 700), 'graphics/dymek_hard.png', Current_pos.MODE_CHOICE, "Black")
+but_back = Button("Powrót", (150, 700), 'graphics/dymek_hard.png', Current_pos.RETURN, "Black") # powrot
+but_yes = Button("Tak", (400, 450), 'graphics/dymek_hard.png', Current_pos.MENU, "Black") #powrot
+but_no = Button("Nie", (800, 450), 'graphics/dymek_hard.png', Current_pos.MENU, "Black") #powrot
 
 class Interface():
     def __init__(self):
@@ -94,6 +97,10 @@ class Interface():
         elif self.game_state == Current_pos.HALL:
             screen.blit(background_hall, (0, 0))
             but_quit.draw_button()
+        elif self.game_state == Current_pos.RETURN: #powrot
+            screen.blit(background_menu, (0, 0))
+            but_yes.draw_button()
+            but_no.drwa_button()
         elif self.game_state == Current_pos.EASY:
             play_game("EASY")
         elif self.game_state == Current_pos.MEDIUM:
@@ -102,6 +109,7 @@ class Interface():
             play_game("HARD")
         elif self.game_state == Current_pos.LEARNING:
             play_game("LEARNING")
+
 
 interface = Interface()
 
