@@ -41,6 +41,7 @@ class Current_pos(Enum):  # enum pozwala zamiast liczb używać niżej wypisanyc
     RESET_SCORE_YES = 10
     RETURN = 11 # powrot
     SAVE = 12 # zapis stanu gry
+    DELETE_SAVE = 13 # "nadpisanie" stanu gry, efektywnie jest on usuwany
 
 
 class Button:
@@ -79,13 +80,13 @@ but_reset_score_yes = Button("Tak", (600, 550), 'graphics/dymek_hard.png', Curre
 but_reset_score_no = Button("Nie", (600, 670), 'graphics/dymek_easy.png', Current_pos.HALL, "Black")
 but_back = Button("Zakończ", (150, 700), 'graphics/dymek_hard.png', Current_pos.RETURN, "Black") # powrot
 but_yes = Button("Tak", (400, 450), 'graphics/dymek_hard.png', Current_pos.SAVE, "Black") #powrot
-but_no = Button("Nie", (800, 450), 'graphics/dymek_hard.png', Current_pos.MENU, "Black") #powrot
-
+but_no = Button("Nie", (800, 450), 'graphics/dymek_hard.png', Current_pos.DELETE_SAVE, "Black") #powrot
 
 class Interface():
     def __init__(self):
         self.game_state = Current_pos.MENU  
         self.buttons = [but_play, but_hall, but_about_us]
+        self.last_mode = None
     def drawing(self):
         if self.game_state == Current_pos.MENU:  # na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
             screen.blit(background_menu, (0, 0))
@@ -132,10 +133,13 @@ class Interface():
             but_yes.draw_button()
             but_no.draw_button()
         elif self.game_state == Current_pos.EASY:
+            self.last_mode = "EASY"
             play_game("EASY")
         elif self.game_state == Current_pos.MEDIUM:
+            self.last_mode = "MEDIUM"
             play_game("MEDIUM")
         elif self.game_state == Current_pos.HARD:
+            self.last_mode = "HARD"
             play_game("HARD")
         elif self.game_state == Current_pos.LEARNING:
             play_game("LEARNING")
@@ -153,11 +157,21 @@ class Interface():
             hard_stats.reset_stats('stats/hard_stats.txt')
             self.game_state = Current_pos.HALL
         elif self.game_state == Current_pos.SAVE:
-            #zapisz statystyki
+            # zapis jest z góry zapisany
+            self.game_state = Current_pos.MENU
+        elif self.game_state == Current_pos.DELETE_SAVE:
+            save_game_state(0, 0, 0, 0, [], 0, 0)
+            if self.last_mode == "EASY":
+                easy_stats.update_stats(final_score, final_bubbles, 'stats/easy_stats.txt')
+            elif self.last_mode == "MEDIUM":
+                medium_stats.update_stats(final_score, final_bubbles, 'stats/medium_stats.txt')
+            elif self.last_mode == "HARD":
+                hard_stats.update_stats(final_score, final_bubbles, 'stats/hard_stats.txt')
             self.game_state = Current_pos.MENU
 
-
-
+# zmienne potrzebne do aktualizacji statystyk
+final_score = 0
+final_bubbles = 0
 
 interface = Interface()
 
@@ -169,12 +183,83 @@ easy_stats.get_stats('stats/easy_stats.txt')
 medium_stats.get_stats('stats/medium_stats.txt')
 hard_stats.get_stats('stats/hard_stats.txt')
 
+def save_game_state(mode, new_object_timer, score, lives, falling_object_list, bubbles_destroyed, is_saved=1):
+    with open('game_state.txt', 'w') as file:
+        file.write(f"is_saved={is_saved}\n")
+        file.write(f"mode={mode}\n")
+        file.write(f"new_object_timer={new_object_timer}\n")
+        file.write(f"score={score}\n")
+        file.write(f"bubbles_destroyed={bubbles_destroyed}\n")
+        file.write(f"lives={lives}\n")
+        for bubble in falling_object_list:
+            file.write(f"x_coordinate={bubble.pos.x}\n")
+            file.write(f"y_coordinate={bubble.pos.y}\n")
+            file.write(f"text={bubble.text}\n")
+
+def load_game_state():
+    try:
+        with open('game_state.txt', 'r') as file:
+            lines = file.readlines()
+            state = {}
+            bubbles = []
+            for line in lines:
+                if line.strip():
+                    key, value = line.strip().split('=')
+
+                    if key == 'is_saved':
+                        state[key] = int(value)
+                    elif key == 'mode':
+                        state[key] = value
+                    elif key == 'new_object_timer' or key == 'lives' or key == 'bubbles_destroyed':
+                        state[key] = int(value)
+                    elif key == 'score':
+                        state[key] = float(value)
+                    elif key == 'x_coordinate':
+                        x_coord = int(value)
+                        y_coord = int(lines[lines.index(line) + 1].strip().split('=')[1])
+                        text = lines[lines.index(line) + 2].strip().split('=')[1]
+                        bubbles.append(Falling_object(state['mode'], x_coord, y_coord, text))
+            state['bubbles'] = bubbles
+    except FileNotFoundError:
+        print("Plik nie istnieje, gra nie może się rozpocząć.")
+    return state
+
+# klasa przechowująca informacje o każdym z dymków w celu
+class Falling_object:
+    # konstruktor
+    def __init__(self, mode, x=None, y=None, text=None):
+        self.image = parameters[mode][1]
+        if x is None or y is None:
+            self.pos = self.image.get_rect().move(random.randrange(width - 250), 0)
+        else:
+            self.pos = self.image.get_rect().move(x, y)
+        # w teorii niepotrzebne
+        # if text is None:
+        #     self.text = words[random.randrange(len(words))]
+        # else:
+        self.text = text
+        self.text_surface = font.render(self.text, False, (0, 0, 0))
+        self.text_pos = self.text_surface.get_rect()
+        self.text_pos.center = self.pos.center
+
+    # przesuwanie całości w dół
+    def fall(self):
+        self.pos = self.pos.move(0, 1)
+        self.text_pos.center = self.pos.center
+
+# słownik z parametrami do każdego z trybów
+parameters = {"LEARNING": (background_learning, dymek_learning, 0),
+                "EASY": (background_easy, dymek_easy, 0.75),
+                "MEDIUM": (background_medium, dymek_medium, 1),
+                "HARD": (background_hard, dymek_hard, 1.5)}
+
 def play_game(mode: str, is_continued=False) -> None:
-    # słownik z parametrami do każdego z trybów
-    parameters = {"LEARNING": (background_learning, dymek_learning, 0),
-                  "EASY": (background_easy, dymek_easy, 0.75),
-                  "MEDIUM": (background_medium, dymek_medium, 1),
-                  "HARD": (background_hard, dymek_hard, 1.5)}
+
+    # # słownik z parametrami do każdego z trybów
+    # parameters = {"LEARNING": (background_learning, dymek_learning, 0),
+    #               "EASY": (background_easy, dymek_easy, 0.75),
+    #               "MEDIUM": (background_medium, dymek_medium, 1),
+    #               "HARD": (background_hard, dymek_hard, 1.5)}
 
     # wybieranie słów z bazy("LEARNING" otwiera wszystkie trzy)
     if mode != "LEARNING":
@@ -210,49 +295,49 @@ def play_game(mode: str, is_continued=False) -> None:
             self.pos = self.pos.move(0, 1)
             self.text_pos.center = self.pos.center
 
-    def save_game_state(mode, new_object_timer, score, lives, falling_object_list, bubbles_destroyed, is_saved=1):
-        with open('game_state.txt', 'w') as file:
-            file.write(f"is_saved={is_saved}\n")
-            file.write(f"mode={mode}\n")
-            file.write(f"new_object_timer={new_object_timer}\n")
-            file.write(f"score={score}\n")
-            file.write(f"bubbles_destroyed={bubbles_destroyed}\n")
-            file.write(f"lives={lives}\n")
-            for bubble in falling_object_list:
-                file.write(f"x_coordinate={bubble.pos.x}\n")
-                file.write(f"y_coordinate={bubble.pos.y}\n")
-                file.write(f"text={bubble.text}\n")
+    # def save_game_state(mode, new_object_timer, score, lives, falling_object_list, bubbles_destroyed, is_saved=1):
+    #     with open('game_state.txt', 'w') as file:
+    #         file.write(f"is_saved={is_saved}\n")
+    #         file.write(f"mode={mode}\n")
+    #         file.write(f"new_object_timer={new_object_timer}\n")
+    #         file.write(f"score={score}\n")
+    #         file.write(f"bubbles_destroyed={bubbles_destroyed}\n")
+    #         file.write(f"lives={lives}\n")
+    #         for bubble in falling_object_list:
+    #             file.write(f"x_coordinate={bubble.pos.x}\n")
+    #             file.write(f"y_coordinate={bubble.pos.y}\n")
+    #             file.write(f"text={bubble.text}\n")
 
-    def load_game_state():
-        try:
-            with open('game_state.txt', 'r') as file:
-                lines = file.readlines()
-                state = {}
-                bubbles = []
-                for line in lines:
-                    if line.strip():
-                        key, value = line.strip().split('=')
+    # def load_game_state():
+    #     try:
+    #         with open('game_state.txt', 'r') as file:
+    #             lines = file.readlines()
+    #             state = {}
+    #             bubbles = []
+    #             for line in lines:
+    #                 if line.strip():
+    #                     key, value = line.strip().split('=')
 
-                        if key == 'is_saved':
-                            state[key] = int(value)
-                        elif key == 'mode':
-                            state[key] = value
-                        elif key == 'new_object_timer' or key == 'lives' or key == 'bubbles_destroyed':
-                            state[key] = int(value)
-                        elif key == 'score':
-                            state[key] = float(value)
-                        elif key == 'x_coordinate':
-                            x_coord = int(value)
-                            y_coord = int(lines[lines.index(line) + 1].strip().split('=')[1])
-                            text = lines[lines.index(line) + 2].strip().split('=')[1]
-                            bubbles.append(Falling_object(state['mode'], x_coord, y_coord, text))
-                state['bubbles'] = bubbles
-        except FileNotFoundError:
-            print("Plik nie istnieje, gra nie może się rozpocząć.")
-        return state
+    #                     if key == 'is_saved':
+    #                         state[key] = int(value)
+    #                     elif key == 'mode':
+    #                         state[key] = value
+    #                     elif key == 'new_object_timer' or key == 'lives' or key == 'bubbles_destroyed':
+    #                         state[key] = int(value)
+    #                     elif key == 'score':
+    #                         state[key] = float(value)
+    #                     elif key == 'x_coordinate':
+    #                         x_coord = int(value)
+    #                         y_coord = int(lines[lines.index(line) + 1].strip().split('=')[1])
+    #                         text = lines[lines.index(line) + 2].strip().split('=')[1]
+    #                         bubbles.append(Falling_object(state['mode'], x_coord, y_coord, text))
+    #             state['bubbles'] = bubbles
+    #     except FileNotFoundError:
+    #         print("Plik nie istnieje, gra nie może się rozpocząć.")
+    #     return state
 
     stan = load_game_state()
-    if stan['is_saved']:
+    if stan['is_saved'] and is_continued:
         mode = stan['mode']
         new_object_timer = stan['new_object_timer']
         score = stan['score']
@@ -260,10 +345,10 @@ def play_game(mode: str, is_continued=False) -> None:
         bubbles_destroyed = stan['bubbles_destroyed']
         falling_object_list = stan['bubbles']
     else:
-        new_object_timer = 100
+        new_object_timer = 0
         score = 0
         lives = 3
-        bubbles_destroyed = 3
+        bubbles_destroyed = 0
         falling_object_list = []
 
 
@@ -287,10 +372,6 @@ def play_game(mode: str, is_continued=False) -> None:
             if event.type == pygame.QUIT: sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 click_check(but_back, mouse_pos)
-                if interface.game_state == Current_pos.MODE_CHOICE:
-                    # gracz wyszedł z gry -> zapisanie STANU GRY
-                    save_game_state(mode, new_object_timer, score, lives, falling_object_list,bubbles_destroyed ,1)
-                    return
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     score, bubbles_destroyed= check_if_correct(text, score, bubbles_destroyed)
@@ -299,6 +380,12 @@ def play_game(mode: str, is_continued=False) -> None:
                     text = text[:-1]
                 else:
                     text += event.unicode
+
+        if interface.game_state == Current_pos.RETURN:
+            save_game_state(mode, new_object_timer, score, lives, falling_object_list,bubbles_destroyed)
+            final_score = score
+            final_bubbles = bubbles_destroyed
+            return
 
         mouse_pos = pygame.mouse.get_pos()
 
@@ -324,7 +411,8 @@ def play_game(mode: str, is_continued=False) -> None:
 
         # tylko w trybach wyzwania, koniec żyć - koniec gry
         if mode in ["EASY", "MEDIUM", "HARD"]:
-            # print game over
+            if lives == 0:
+                # print game over
                 if mode == "EASY":
                     easy_stats.update_stats(score, bubbles_destroyed, 'stats/easy_stats.txt')
                 elif mode == "MEDIUM":
@@ -332,7 +420,7 @@ def play_game(mode: str, is_continued=False) -> None:
                 elif mode == "HARD":
                     hard_stats.update_stats(score, bubbles_destroyed, 'stats/hard_stats.txt')
                 interface.game_state = Current_pos.MENU
-                #reset pliku zapisu, ustawienie flagi is_saved=0
+                # reset pliku zapisu, ustawienie flagi is_saved = 0
                 save_game_state(mode, new_object_timer, score, 3, falling_object_list,bubbles_destroyed ,0)
                 return
 
