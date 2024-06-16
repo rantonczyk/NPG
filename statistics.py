@@ -1,3 +1,5 @@
+import os
+
 class Stats:
     def __init__(self):
         # Inicjalizacja zmiennych przechowujących statystyki
@@ -31,6 +33,14 @@ class Stats:
 
     def get_stats(self, filename):
         # Pobranie statystyk przy uruchomieniu trybu
+
+        if not os.path.exists(filename):
+            with open(filename, 'w') as file:
+                file.write("games_played=0\n")
+                file.write("best_score=0\n")
+                file.write("current_score=0\n")
+                file.write("bubbles_popped=0\n")
+
         try:
             with open(filename, 'r') as file:
                 for line in file:
