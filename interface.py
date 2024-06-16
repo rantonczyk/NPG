@@ -114,7 +114,8 @@ hardStats = main.stats.Stats()
 # but_hard = main.Button("Trudny", (600, 500), 'graphics/dymek_easy.png', main.Current_pos.HARD, "Black")
 # but_learning = main.Button("Nauka", (600, 110), 'graphics/dymek_easy.png', main.Current_pos.LEARNING, "Black")
 # but_back = main.Button("Powrót", (150, 700), 'graphics/dymek_hard.png', main.Current_pos.MODE_CHOICE, "Black")
-buttons = [main.but_play, main.but_hall, main.but_about_us, main.but_quit, main.but_easy, main.but_medium, main.but_hard, main.but_learning]
+# buttons = [main.but_play, main.but_hall, main.but_about_us, main.but_quit, main.but_easy, main.but_medium, main.but_hard, main.but_learning,
+#            main.but_quit_score, main.but_reset_score, main.but_reset_score_yes, main.but_reset_score_no]
 
 while True:
     for event in pygame.event.get():
@@ -122,7 +123,7 @@ while True:
             pygame.quit()
             exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            for button in buttons:
+            for button in main.interface.buttons:
                 main.click_check(button, mouse_pos)
                          
     mouse_pos = pygame.mouse.get_pos()
