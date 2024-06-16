@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 is_saved=1
 mode=MEDIUM
 new_object_timer=49
@@ -10,3 +11,11 @@ text=zas³ona
 x_coordinate=538
 y_coordinate=49
 text=samolot
+=======
+is_saved=0
+mode=0
+new_object_timer=0
+score=0
+bubbles_destroyed=0
+lives=0
+>>>>>>> main
