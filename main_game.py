@@ -36,6 +36,7 @@ class Current_pos(Enum): #enum pozwala zamiast liczb używać niżej wypisanych 
     LEARNING = 8
     SCORE_RESET = 9
     RESET_SCORE_YES = 10
+    RETURN = 11 # powrot
 
 class Button:
     def __init__(self, text: str, position: tuple, graphic, action, font_color ='Black', font=game_font) -> None: 
@@ -73,11 +74,13 @@ but_easy = Button("Łatwy", (600, 240), 'graphics/dymek_easy.png', Current_pos.E
 but_medium = Button("Średni", (600,370), 'graphics/dymek_easy.png',Current_pos.MEDIUM, "Black")
 but_hard = Button("Trudny", (600, 500), 'graphics/dymek_easy.png', Current_pos.HARD, "Black")
 but_learning = Button("Nauka", (600, 110), 'graphics/dymek_easy.png', Current_pos.LEARNING, "Black")
-but_back = Button("Powrót", (150, 700), 'graphics/dymek_hard.png', Current_pos.MODE_CHOICE, "Black")
 but_quit_score = Button("Wyjdź", (250, 690), 'graphics/dymek_easy.png', Current_pos.MENU, "Black")
 but_reset_score = Button("Wyczyść", (950, 690), 'graphics/dymek_easy.png', Current_pos.SCORE_RESET, "Black")
 but_reset_score_yes = Button("Tak", (600, 550), 'graphics/dymek_hard.png', Current_pos.RESET_SCORE_YES, "Black")
 but_reset_score_no = Button("Nie", (600, 670), 'graphics/dymek_easy.png', Current_pos.HALL, "Black")
+but_back = Button("Powrót", (150, 700), 'graphics/dymek_hard.png', Current_pos.RETURN, "Black") # powrot
+but_yes = Button("Tak", (400, 450), 'graphics/dymek_hard.png', Current_pos.MENU, "Black") #powrot
+but_no = Button("Nie", (800, 450), 'graphics/dymek_hard.png', Current_pos.MENU, "Black") #powrot
 
 class Interface():
     def __init__(self):
@@ -122,6 +125,12 @@ class Interface():
             self.buttons = [but_quit_score, but_reset_score]
             but_quit_score.draw_button()
             but_reset_score.draw_button()
+            but_quit.draw_button()
+        elif self.game_state == Current_pos.RETURN: #powrot
+            self.buttons = [but_yes, but_no]
+            screen.blit(background_menu, (0, 0))
+            but_yes.draw_button()
+            but_no.draw_button()
         elif self.game_state == Current_pos.EASY:
             play_game("EASY")
         elif self.game_state == Current_pos.MEDIUM:
@@ -143,6 +152,7 @@ class Interface():
             medium_stats.reset_stats('stats/medium_stats.txt')
             hard_stats.reset_stats('stats/hard_stats.txt')
             self.game_state = Current_pos.HALL
+
 
 
 interface = Interface()
