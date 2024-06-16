@@ -1,0 +1,5 @@
+To jest przykład
+danych
+umieszczonych
+w pliku
+custom.txt
