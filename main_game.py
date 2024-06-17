@@ -15,6 +15,8 @@ size = width, height = 1200, 800
 screen = pygame.display.set_mode(size)
 game_font = pygame.font.Font('fonts/Inconsolata-Bold.ttf', 60)
 
+# wczytanie potrzebnych grafik
+
 background_easy = pygame.image.load('graphics/background_easy.png').convert()
 background_medium = pygame.image.load('graphics/background_medium.png').convert()
 background_hard = pygame.image.load('graphics/background_hard.png').convert()
@@ -28,23 +30,28 @@ dymek_hard = pygame.image.load('graphics/dymek_hard.png')
 dymek_learning = pygame.image.load('graphics/dymek_learning.png')
 dymek_resized = pygame.image.load('graphics/dymek_resized.png')
 
-class Current_pos(Enum):   # enum pozwala zamiast liczb używać niżej wypisanych nazw w celu poprawienia czytelności kodu
-    MENU = 1
-    EASY = 2
-    MEDIUM = 3
-    HARD = 4
-    MODE_CHOICE = 5
-    HALL = 6
-    ABOUT_US = 7
-    LEARNING = 8
-    SCORE_RESET = 9
-    RESET_SCORE_YES = 10
+# klasa dekodująca aktualny stan gry
+# enum pozwala zamiast liczb używać niżej wypisanych nazw w celu poprawienia czytelności kodu
+
+class Current_pos(Enum):
+    MENU = 1 # menu
+    EASY = 2 # tryb łatwy
+    MEDIUM = 3 # tryb średni
+    HARD = 4 # tryb trudny
+    MODE_CHOICE = 5 # wybór trybu gry
+    HALL = 6 # statystyki
+    ABOUT_US = 7 # strona o nas
+    LEARNING = 8 # tryb nauki
+    SCORE_RESET = 9 # reset statystyk
+    RESET_SCORE_YES = 10 # potwierdzenie resetu
     RETURN = 11 # powrot
     SAVE = 12 # zapis stanu gry
     DELETE_SAVE = 13 # "nadpisanie" stanu gry, efektywnie jest on usuwany
-    CONTINUE = 14
-    CUSTOM = 15
-    CUSTOM_ASK = 16
+    CONTINUE = 14 # kontynuacja
+    CUSTOM = 15 # tryb własny
+    CUSTOM_ASK = 16 # pytanie o zawartość pliku
+
+# klasa pozwalająca na tworzenie przycisku
 
 class Button:
     def __init__(self, text: str, position: tuple, graphic, action, font_color='Black', font=game_font) -> None:
@@ -58,13 +65,17 @@ class Button:
         self.graphic_rect = self.graphic.get_rect(center=(self.position))
         self.action = action
 
+    # wyrysowanie przycisku
     def draw_button(self):
         screen.blit(self.graphic, self.graphic_rect)
         screen.blit(self.button_text, self.button_rect)
 
+# sprawdzenie, czy dany przycisk został wciśnięty
 def click_check(button: Button, mouse_pos) -> None:
     if button.button_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
         interface.game_state = button.action
+
+# tytaj proszę zamieszczać swoje przyciski
 
 but_play = Button("Graj", (400, 300), 'graphics/dymek_easy.png', Current_pos.MODE_CHOICE, "Black")
 but_hall = Button("Wyniki", (400, 430), 'graphics/dymek_easy.png', Current_pos.HALL, "Black")
@@ -85,6 +96,7 @@ but_continue = Button("Kontynuuj", (400, 700), 'graphics/dymek_resized.png', Cur
 but_custom = Button("Własny", (400, 395), 'graphics/dymek_easy.png', Current_pos.CUSTOM_ASK, "Black")
 but_play_custom = Button("Graj", (600, 500), 'graphics/dymek_easy.png', Current_pos.CUSTOM, "Black")
 
+# sprawdzenie, czy istnieje zapis gry
 def is_save_available():
     try:
         with open('game_state.txt', 'r') as file:
@@ -95,15 +107,18 @@ def is_save_available():
         return False
     except FileNotFoundError:
         return False
-
+    
+# główna klasa definiująca, co ma się w danym momencie gry wyświetlać i jakie funkcje są wtedy dostępne
 class Interface():
     def __init__(self):
         self.game_state = Current_pos.MENU  
         self.buttons = [but_play, but_hall, but_about_us]
         self.last_mode = None
         self.save_info = (None, None)
+    
+    # na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
     def drawing(self):
-        if self.game_state == Current_pos.MENU:   # na podstawie stanu rozgrywki wyświetlane są odpowiednie elementy interfejsu
+        if self.game_state == Current_pos.MENU:
             screen.blit(background_menu, (0, 0))
             if is_save_available():
                 self.buttons = [but_play, but_hall, but_about_us, but_continue]
@@ -213,6 +228,7 @@ class Interface():
         elif self.game_state == Current_pos.CONTINUE:
             self.save_info = play_game("CONTINUE", True)
 
+# inicjalizacja zmiennych
 interface = Interface()
 
 easy_stats = stats.Stats()
@@ -223,6 +239,7 @@ easy_stats.get_stats('stats/easy_stats.txt')
 medium_stats.get_stats('stats/medium_stats.txt')
 hard_stats.get_stats('stats/hard_stats.txt')
 
+# zapisanie stanu gry do pliku
 def save_game_state(mode, new_object_timer, score, lives, falling_object_list, bubbles_destroyed, is_saved=1):
     with open('game_state.txt', 'w') as file:
         file.write(f"is_saved={is_saved}\n")
@@ -236,6 +253,7 @@ def save_game_state(mode, new_object_timer, score, lives, falling_object_list, b
             file.write(f"y_coordinate={bubble.pos.y}\n")
             file.write(f"text={bubble.text}\n")
 
+# wczytanie zapisu z pliku
 def load_game_state():
     try:
         with open('game_state.txt', 'r') as file:
@@ -264,7 +282,7 @@ def load_game_state():
         print("Plik nie istnieje, gra nie może się rozpocząć.")
     return state
 
-# klasa przechowująca informacje o każdym z dymków w celu
+# klasa przechowująca informacje o każdym z dymków
 class Falling_object:
     # konstruktor
     def __init__(self, mode, x=None, y=None, text=None):
@@ -290,9 +308,12 @@ parameters = {"LEARNING": (background_learning, dymek_learning, 0),
                 "HARD": (background_hard, dymek_hard, 1.5),
                 "CUSTOM": (background_learning, dymek_learning, 1)}
 
+# główna funkcja realizująca działanie gry
+
 def play_game(mode: str, is_continued=False) -> tuple[float, int]:
 
     # klasa przechowująca informacje o każdym z dymków
+    # "nadpisanie" już istniejącej klasy
     class Falling_object:
         def __init__(self, mode, x=None, y=None, text=None):
             self.image = parameters[mode][1]
@@ -313,6 +334,7 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
             self.pos = self.pos.move(0, 1)
             self.text_pos.center = self.pos.center
 
+    # sprawdzenie, czy rozpoczynamy nową grę i inicjalizacja parametrów gry
     stan = load_game_state()
     if stan['is_saved'] and is_continued:
         mode = stan['mode']
@@ -328,7 +350,8 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
         bubbles_destroyed = 0
         falling_object_list = []
 
-    # wybieranie słów z bazy("LEARNING" otwiera wszystkie trzy)
+    # tworzenie listy słów
+    # "LEARNING" otwiera wszystkie trzy
     if mode != "LEARNING":
         with open("word_base/" + mode + ".txt", "r", encoding="UTF-8") as file:
             words = file.read().split("\n")
@@ -350,6 +373,7 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
                 break
         return score, bubbles_destroyed
 
+    # kolejne parametry
     input_box = pygame.Rect(width / 2 - 100, height - 100, 140, 32)
     text = ''
     code = 0
@@ -388,6 +412,7 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
                     text += event.unicode
                     code = 0
 
+        # koniec gry wywołany naciśnięciem przycisku "Zakończ"
         if interface.game_state == Current_pos.RETURN:
             if mode == "LEARNING":
                 interface.game_state = Current_pos.MODE_CHOICE
