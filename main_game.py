@@ -45,7 +45,7 @@ class Current_pos(Enum):   # enum pozwala zamiast liczb używać niżej wypisany
     CONTINUE = 14
     CUSTOM = 15
     CUSTOM_ASK = 16
-    LOSE = 15
+    LOSE = 17
 
 class Button:
     def __init__(self, text: str, position: tuple, graphic, action, font_color='Black', font=game_font) -> None:
@@ -164,7 +164,12 @@ class Interface():
             self.buttons = [but_quit]
             but_quit.draw_button()
             screen.blit(big_font.render("Przegrana!!!",False,(100,0,100)),(470,300))
-            screen.blit(bigger_font.render(f"Zniszczone dymki: {hard_stats.bubbles_destroyed}", False, (0, 0, 0)), (430, 400))
+            if self.last_mode == "EASY":
+                screen.blit(big_font.render(f"Zniszczone dymki: {easy_stats.bubbles_destroyed}", False, (0, 0, 0)), (430, 390))
+            elif self.last_mode == "MEDIUM":
+                screen.blit(big_font.render(f"Zniszczone dymki: {medium_stats.bubbles_destroyed}", False, (0, 0, 0)), (430, 390))
+            elif self.last_mode == "HARD":
+                screen.blit(big_font.render(f"Zniszczone dymki: {hard_stats.bubbles_destroyed}", False, (0, 0, 0)), (430, 390))
         elif self.game_state == Current_pos.RETURN: #powrot
             self.buttons = [but_yes, but_no]
             screen.blit(background_easy, (0, 0))
