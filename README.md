@@ -1,9 +1,9 @@
-Aby uruchomić grę należy uruchomić plik interface.py
-Gra została zaprogramowana na zaliczenie projektu na Narzędzia Pracy Grupowej
+Aby uruchomić grę należy uruchomić plik interface.py. <br>
+Gra została zaprogramowana na zaliczenie projektu na Narzędzia Pracy Grupowej <br>
 
-AGH WEAIiIB AiR 2024
-Kacper Basoń
-Michał Barnaś
-Mateusz Dańków
-Radosław Antończyk
-Julia Brąglewicz
+AGH WEAIiIB AiR 2024 <br>
+Kacper Basoń <br>
+Michał Barnaś <br>
+Mateusz Dańków <br>
+Radosław Antończyk <br>
+Julia Brąglewicz <br>
