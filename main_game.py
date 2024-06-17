@@ -177,12 +177,8 @@ class Interface():
             self.buttons = [but_quit]
             but_quit.draw_button()
             screen.blit(big_font.render("Przegrana!!!",False,(100,0,100)),(470,300))
-            if self.last_mode == "EASY":
-                screen.blit(big_font.render(f"Zniszczone dymki: {easy_stats.bubbles_destroyed}", False, (0, 0, 0)), (430, 390))
-            elif self.last_mode == "MEDIUM":
-                screen.blit(big_font.render(f"Zniszczone dymki: {medium_stats.bubbles_destroyed}", False, (0, 0, 0)), (430, 390))
-            elif self.last_mode == "HARD":
-                screen.blit(big_font.render(f"Zniszczone dymki: {hard_stats.bubbles_destroyed}", False, (0, 0, 0)), (430, 390))
+            screen.blit(big_font.render(f"Zniszczone dymki: {self.save_info[1]} ", False, (0, 0, 0)), (390, 390))
+            screen.blit(big_font.render(f"punkty: {self.save_info[0]} ", False, (0, 0, 0)), (460, 440))
         elif self.game_state == Current_pos.RETURN: #powrot
             self.buttons = [but_yes, but_no]
             screen.blit(background_easy, (0, 0))
@@ -465,7 +461,7 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
                 interface.game_state = Current_pos.LOSE
                 # reset pliku zapisu, ustawienie flagi is_saved = 0
                 save_game_state(mode, new_object_timer, score, 3, falling_object_list,bubbles_destroyed ,0)
-                return
+                return score,bubbles_destroyed
 
         # wyrysowanie okna do wpisywania wyrazów i przycisku powrotnego
         txt_surface = font.render(text, False, 'black')
