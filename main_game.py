@@ -47,11 +47,10 @@ class Current_pos(Enum):
     RETURN = 11 # powrot
     SAVE = 12 # zapis stanu gry
     DELETE_SAVE = 13 # "nadpisanie" stanu gry, efektywnie jest on usuwany
-    CONTINUE = 14 # kontynuacja
-    CUSTOM = 15 # tryb własny
-    CUSTOM_ASK = 16 # pytanie o zawartość pliku
-
-# klasa pozwalająca na tworzenie przycisku
+    CONTINUE = 14
+    CUSTOM = 15
+    CUSTOM_ASK = 16
+    LOSE = 17
 
 class Button:
     def __init__(self, text: str, position: tuple, graphic, action, font_color='Black', font=game_font) -> None:
@@ -173,6 +172,12 @@ class Interface():
             self.buttons = [but_quit_score, but_reset_score]
             but_quit_score.draw_button()
             but_reset_score.draw_button()
+        elif self.game_state == Current_pos.LOSE:
+            screen.blit(background_easy,(0,0))
+            self.buttons = [but_quit]
+            but_quit.draw_button()
+            screen.blit(big_font.render("Przegrana!!!",False,(100,0,100)),(470,300))
+            screen.blit(bigger_font.render(f"Zniszczone dymki: {hard_stats.bubbles_destroyed}", False, (0, 0, 0)), (430, 400))
         elif self.game_state == Current_pos.RETURN: #powrot
             self.buttons = [but_yes, but_no]
             screen.blit(background_easy, (0, 0))
@@ -452,7 +457,7 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
                     medium_stats.update_stats(score, bubbles_destroyed, 'stats/medium_stats.txt')
                 elif mode == "HARD":
                     hard_stats.update_stats(score, bubbles_destroyed, 'stats/hard_stats.txt')
-                interface.game_state = Current_pos.MENU
+                interface.game_state = Current_pos.LOSE
                 # reset pliku zapisu, ustawienie flagi is_saved = 0
                 save_game_state(mode, new_object_timer, score, 3, falling_object_list,bubbles_destroyed ,0)
                 return
