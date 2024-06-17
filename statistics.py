@@ -22,6 +22,7 @@ class Stats:
             self.best_score = score
         self.save_to_file(filename)
 
+    # zapis statystyk do piku
     def save_to_file(self, filename):
         try:
             with open(filename, 'w') as file:

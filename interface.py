@@ -3,7 +3,7 @@ from sys import exit
 from enum import Enum
 import main_game as main
 
-# podstawowe parametry
+# podstawowe parametry gry
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -18,6 +18,8 @@ mouse_pos = pygame.mouse.get_pos()
 easyStats = main.stats.Stats()
 mediumStats = main.stats.Stats()
 hardStats = main.stats.Stats()
+
+# główna pętla obsługująca interfejs gry
 
 while True:
     for event in pygame.event.get():
