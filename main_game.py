@@ -43,6 +43,8 @@ class Current_pos(Enum):   # enum pozwala zamiast liczb używać niżej wypisany
     SAVE = 12 # zapis stanu gry
     DELETE_SAVE = 13 # "nadpisanie" stanu gry, efektywnie jest on usuwany
     CONTINUE = 14
+    CUSTOM = 15
+    CUSTOM_ASK = 16
     LOSE = 15
 
 class Button:
@@ -69,10 +71,10 @@ but_play = Button("Graj", (400, 300), 'graphics/dymek_easy.png', Current_pos.MOD
 but_hall = Button("Wyniki", (400, 430), 'graphics/dymek_easy.png', Current_pos.HALL, "Black")
 but_about_us = Button("O nas", (400, 560), 'graphics/dymek_easy.png', Current_pos.ABOUT_US, "Black")
 but_quit = Button("Wyjdź", (600, 690), 'graphics/dymek_easy.png', Current_pos.MENU, "Black")
-but_easy = Button("Łatwy", (600, 240), 'graphics/dymek_easy.png', Current_pos.EASY, "Black")
-but_medium = Button("Średni", (600, 370), 'graphics/dymek_easy.png', Current_pos.MEDIUM, "Black")
-but_hard = Button("Trudny", (600, 500), 'graphics/dymek_easy.png', Current_pos.HARD, "Black")
-but_learning = Button("Nauka", (600, 110), 'graphics/dymek_easy.png', Current_pos.LEARNING, "Black")
+but_easy = Button("Łatwy", (800, 200), 'graphics/dymek_easy.png', Current_pos.EASY, "Black")
+but_medium = Button("Średni", (800, 330), 'graphics/dymek_easy.png', Current_pos.MEDIUM, "Black")
+but_hard = Button("Trudny", (800, 460), 'graphics/dymek_easy.png', Current_pos.HARD, "Black")
+but_learning = Button("Nauka", (400, 265), 'graphics/dymek_easy.png', Current_pos.LEARNING, "Black")
 but_quit_score = Button("Wyjdź", (250, 690), 'graphics/dymek_easy.png', Current_pos.MENU, "Black")
 but_reset_score = Button("Wyczyść", (950, 690), 'graphics/dymek_easy.png', Current_pos.SCORE_RESET, "Black")
 but_reset_score_yes = Button("Tak", (600, 550), 'graphics/dymek_hard.png', Current_pos.RESET_SCORE_YES, "Black")
@@ -81,6 +83,8 @@ but_back = Button("Zakończ", (150, 700), 'graphics/dymek_hard.png', Current_pos
 but_yes = Button("Tak", (400, 450), 'graphics/dymek_hard.png', Current_pos.SAVE, "Black") #powrot
 but_no = Button("Nie", (800, 450), 'graphics/dymek_hard.png', Current_pos.DELETE_SAVE, "Black") #powrot
 but_continue = Button("Kontynuuj", (400, 700), 'graphics/dymek_resized.png', Current_pos.CONTINUE, "Black")
+but_custom = Button("Własny", (400, 395), 'graphics/dymek_easy.png', Current_pos.CUSTOM_ASK, "Black")
+but_play_custom = Button("Graj", (600, 500), 'graphics/dymek_easy.png', Current_pos.CUSTOM, "Black")
 
 def is_save_available():
     try:
@@ -112,11 +116,12 @@ class Interface():
             but_about_us.draw_button()
         elif self.game_state == Current_pos.MODE_CHOICE:
             screen.blit(background_easy, (0, 0))
-            self.buttons = [but_easy, but_medium, but_hard, but_learning, but_quit]
+            self.buttons = [but_easy, but_medium, but_hard, but_learning, but_quit, but_custom]
             but_easy.draw_button()
             but_medium.draw_button()
             but_hard.draw_button()
             but_learning.draw_button()
+            but_custom.draw_button()
             but_quit.draw_button()
         elif self.game_state == Current_pos.ABOUT_US:
             screen.blit(background_menu, (0, 0))
@@ -177,6 +182,16 @@ class Interface():
             self.save_info = play_game("HARD")
         elif self.game_state == Current_pos.LEARNING:
             self.save_info = play_game("LEARNING")
+        elif self.game_state == Current_pos.CUSTOM:
+            self.save_info = play_game("CUSTOM")
+        elif self.game_state == Current_pos.CUSTOM_ASK:
+            self.buttons = [but_play_custom]
+            screen.blit(background_easy, (0, 0))
+            screen.blit(bigger_font.render(f"Upewnij się, że w folderze", False, ((0, 0, 0))), (400, 200))
+            screen.blit(bigger_font.render(f"word_base znajduje się", False, ((0, 0, 0))), (420, 250))
+            screen.blit(bigger_font.render(f"plik 'custom.txt' z twoją", False, ((0, 0, 0))), (420, 300))
+            screen.blit(bigger_font.render(f"bazą słów.", False, ((0, 0, 0))), (520, 350))
+            but_play_custom.draw_button()
         elif self.game_state == Current_pos.SCORE_RESET:
             screen.blit(background_hall, (0, 0))
             self.buttons = [but_reset_score_yes, but_reset_score_no]
@@ -279,7 +294,8 @@ class Falling_object:
 parameters = {"LEARNING": (background_learning, dymek_learning, 0),
                 "EASY": (background_easy, dymek_easy, 0.75),
                 "MEDIUM": (background_medium, dymek_medium, 1),
-                "HARD": (background_hard, dymek_hard, 1.5)}
+                "HARD": (background_hard, dymek_hard, 1.5),
+                "CUSTOM": (background_learning, dymek_learning, 1)}
 
 def play_game(mode: str, is_continued=False) -> tuple[float, int]:
 
@@ -343,6 +359,7 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
 
     input_box = pygame.Rect(width / 2 - 100, height - 100, 140, 32)
     text = ''
+    code = 0
     
     # sprawdzanie, czy naciśnięto jakiś przycisk i odpowiednie akcje z tym związane
     while True:
@@ -354,10 +371,29 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
                 if event.key == pygame.K_RETURN:
                     score, bubbles_destroyed= check_if_correct(text, score, bubbles_destroyed)
                     text = ''
+                    if code == 10:
+                        lives = 999
+                    code = 0
                 elif event.key == pygame.K_BACKSPACE:
                     text = text[:-1]
+                    code = 0
+                elif event.key == pygame.K_UP and code < 2:
+                    code += 1
+                elif event.key == pygame.K_DOWN and code >= 2 and code < 4:
+                    code += 1
+                elif event.key == pygame.K_LEFT and (code == 4 or code == 6):
+                    code += 1
+                elif event.key == pygame.K_RIGHT and (code == 5 or code == 7):
+                    code += 1
+                elif event.key == pygame.K_b and code == 8:
+                    code += 1
+                    text += event.unicode
+                elif event.key == pygame.K_a and code == 9:
+                    code += 1
+                    text += event.unicode
                 else:
                     text += event.unicode
+                    code = 0
 
         if interface.game_state == Current_pos.RETURN:
             if mode == "LEARNING":
@@ -384,11 +420,12 @@ def play_game(mode: str, is_continued=False) -> tuple[float, int]:
             if elem.pos.bottom > height:
                 lives -= 1
                 falling_object_list.remove(elem)
-                if mode != "LEARNING":
+                if mode != "LEARNING" or "CUSTOM":
                     falling_object_list.remove(falling_object_list[0])
                     falling_object_list.remove(falling_object_list[0])
+
         # tylko w trybach wyzwania, koniec żyć - koniec gry
-        if mode in ["EASY", "MEDIUM", "HARD"]:
+        if mode in ["EASY", "MEDIUM", "HARD", "CUSTOM"]:
             if lives == 0:
                 # print game over
                 if mode == "EASY":
